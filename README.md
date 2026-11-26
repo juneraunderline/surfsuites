@@ -8,6 +8,7 @@ Site institucional e sistema de reservas online da Pousada do Surf, em Peruíbe-
 - **Hospedagem e deploy:** Vercel
 - **Autenticação e banco de dados:** Supabase
 - **Build:** Vite + Nitro
+- **E-mails transacionais:** Resend
 
 ## Desenvolvimento local
 
@@ -30,8 +31,12 @@ Configure as variáveis no painel da Vercel em **Settings → Environment Variab
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave publicável do Supabase, usada pelo navegador |
 | `SUPABASE_URL` | URL do Supabase no servidor |
 | `SUPABASE_PUBLISHABLE_KEY` | Chave publicável do Supabase no servidor |
+| `RESEND_API_KEY` | Chave secreta da API do Resend; somente servidor |
+| `RESEND_FROM_EMAIL` | Remetente verificado no Resend, por exemplo `SurfSuites <reservas@seudominio.com.br>` |
 | `CRON_SECRET` | Segredo opcional para proteger rotinas agendadas, se utilizadas |
 | `CRON_SECRET_PREVIOUS` | Segredo anterior opcional durante rotação |
+
+O formulário de reservas exige e-mail. Ao confirmar uma reserva no painel, o servidor valida a sessão e a função de administrador, atualiza o status e envia a confirmação pelo Resend. A chave `RESEND_API_KEY` nunca deve ter prefixo `VITE_` nem ser exposta ao navegador. O endereço definido em `RESEND_FROM_EMAIL` precisa pertencer a um domínio ou remetente verificado na conta Resend.
 
 Nunca coloque chaves secretas ou a service role em variáveis com prefixo `VITE_`.
 
