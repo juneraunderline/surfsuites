@@ -1,24 +1,44 @@
 # SurfSuites
 
-https://www.facebook.com/share/1EFcs54CKs/ preciso fazer um site pra esse estabelecimento com reservas on LINE
+Site institucional e sistema de reservas online da Pousada do Surf, em Peruíbe-SP.
 
-This project was built with [Lovable](https://lovable.dev).
+## Stack
 
-## Build with Lovable
+- **Frontend e aplicação:** React + TanStack Start
+- **Hospedagem e deploy:** Vercel
+- **Autenticação e banco de dados:** Supabase
+- **Build:** Vite + Nitro
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/b456c6df-7c76-4578-ad04-76ca194ca780).
+## Desenvolvimento local
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Requisitos: Node.js 20+ e Bun.
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+git clone https://github.com/juneraunderline/surfsuites.git
+cd surfsuites
+bun install
+bun run dev
 ```
+
+## Variáveis de ambiente
+
+Configure as variáveis no painel da Vercel em **Settings → Environment Variables**:
+
+| Variável | Uso |
+| --- | --- |
+| `VITE_SUPABASE_URL` | URL pública do projeto Supabase, usada pelo navegador |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave publicável do Supabase, usada pelo navegador |
+| `SUPABASE_URL` | URL do Supabase no servidor |
+| `SUPABASE_PUBLISHABLE_KEY` | Chave publicável do Supabase no servidor |
+| `CRON_SECRET` | Segredo opcional para proteger rotinas agendadas, se utilizadas |
+| `CRON_SECRET_PREVIOUS` | Segredo anterior opcional durante rotação |
+
+Nunca coloque chaves secretas ou a service role em variáveis com prefixo `VITE_`.
+
+## Build
+
+```bash
+bun run build
+```
+
+A Vercel detecta o TanStack Start e usa Nitro para gerar as funções de servidor.
