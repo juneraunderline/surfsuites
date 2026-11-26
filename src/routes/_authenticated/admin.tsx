@@ -111,8 +111,8 @@ function Admin() {
               </p>
               {r.mensagem && <p className="mt-2 text-sm text-muted-foreground">{r.mensagem}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button size="sm" disabled={confirmando === r.id || !r.email} onClick={() => confirmarEEnviar(r.id)}>
-                  {confirmando === r.id ? "Enviando…" : r.status === "confirmada" ? "Reenviar e-mail" : "Confirmar e enviar e-mail"}
+                <Button size="sm" disabled={confirmando === r.id || (r.status === "confirmada" && !r.email)} onClick={() => confirmarEEnviar(r.id)}>
+                  {confirmando === r.id ? "Enviando…" : !r.email && r.status === "confirmada" ? "Sem e-mail para reenviar" : !r.email ? "Confirmar (sem e-mail)" : r.status === "confirmada" ? "Reenviar e-mail" : "Confirmar e enviar e-mail"}
                 </Button>
                 <Button size="sm" variant="outline" disabled={confirmando === r.id} onClick={() => setStatus(r.id, "cancelada")}>Cancelar</Button>
               </div>
