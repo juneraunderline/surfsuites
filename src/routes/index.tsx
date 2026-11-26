@@ -33,14 +33,17 @@ function Index() {
     const check_in = String(f.get("check_in"));
     const check_out = String(f.get("check_out"));
     if (check_out <= check_in) return setErro("A saída precisa ser depois da entrada.");
+
+    const email = String(f.get("email") || "").trim();
+    if (!email) return setErro("Informe seu e-mail para receber a confirmação da reserva.");
+
     setLoading(true);
     setErro(null);
-    const email = String(f.get("email") || "").trim();
     const mensagem = String(f.get("mensagem") || "").trim();
     const { error } = await supabase.from("reservas").insert({
       nome: String(f.get("nome")).trim(),
       telefone: String(f.get("telefone")).trim(),
-      email: email || null,
+      email,
       mensagem: mensagem || null,
       check_in,
       check_out,
@@ -93,7 +96,7 @@ function Index() {
             <form onSubmit={reservar} className="mt-8 grid gap-4 rounded-2xl bg-card p-6 text-card-foreground md:grid-cols-2">
               <div className="space-y-2 md:col-span-2"><Label htmlFor="nome">Nome</Label><Input id="nome" name="nome" required minLength={2} maxLength={100} /></div>
               <div className="space-y-2"><Label htmlFor="telefone">WhatsApp</Label><Input id="telefone" name="telefone" type="tel" required minLength={8} maxLength={30} placeholder="(11) 99999-9999" /></div>
-              <div className="space-y-2"><Label htmlFor="email">E-mail (opcional)</Label><Input id="email" name="email" type="email" maxLength={255} /></div>
+              <div className="space-y-2"><Label htmlFor="email">E-mail</Label><Input id="email" name="email" type="email" required maxLength={255} autoComplete="email" /></div>
               <div className="space-y-2"><Label htmlFor="check_in">Entrada</Label><Input id="check_in" name="check_in" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="check_out">Saída</Label><Input id="check_out" name="check_out" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="hospedes">Hóspedes</Label>

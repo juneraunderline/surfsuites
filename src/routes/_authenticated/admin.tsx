@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { confirmarReservaEEnviarEmail } from "@/lib/confirm-reservation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,11 +25,15 @@ const fmt = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("pt-BR")
 function Admin() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [confirmando, setConfirmando] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, string>>({});
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      const { data } = await supabase.rpc("has_role", { _user_id: u.user!.id, _role: "admin" });
+      if (!u.user) return false;
+      const { data, error } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+      if (error) throw error;
       return !!data;
     },
   });
@@ -41,10 +47,33 @@ function Admin() {
     },
   });
 
-  async function setStatus(id: string, status: Status) {
-    await supabase.from("reservas").update({ status }).eq("id", id);
-    qc.invalidateQueries({ queryKey: ["reservas"] });
+  async function confirmarEEnviar(id: string) {
+    setConfirmando(id);
+    setFeedback((current) => ({ ...current, [id]: "" }));
+    try {
+      const result = await confirmarReservaEEnviarEmail({ data: { id } });
+      setFeedback((current) => ({ ...current, [id]: result.message }));
+      await qc.invalidateQueries({ queryKey: ["reservas"] });
+    } catch (error) {
+      setFeedback((current) => ({
+        ...current,
+        [id]: error instanceof Error ? error.message : "Não foi possível confirmar a reserva.",
+      }));
+    } finally {
+      setConfirmando(null);
+    }
   }
+
+  async function setStatus(id: string, status: Status) {
+    const { error } = await supabase.from("reservas").update({ status }).eq("id", id);
+    if (error) {
+      setFeedback((current) => ({ ...current, [id]: "Não foi possível atualizar o status da reserva." }));
+      return;
+    }
+    setFeedback((current) => ({ ...current, [id]: "" }));
+    await qc.invalidateQueries({ queryKey: ["reservas"] });
+  }
+
   async function sair() {
     await qc.cancelQueries();
     qc.clear();
@@ -77,14 +106,17 @@ function Admin() {
                 </Badge>
               </div>
               <p className="mt-2 text-sm">
-                <a className="text-primary underline" href={`https://wa.me/${r.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">{r.telefone}</a>
-                {r.email && <> · {r.email}</>}
+                <a className="text-primary underline" href={`https://wa.me/${r.telefone.replace(/\\D/g, "")}`} target="_blank" rel="noreferrer">{r.telefone}</a>
+                {r.email ? <> · {r.email}</> : <> · <span className="text-destructive">E-mail não informado</span></>}
               </p>
               {r.mensagem && <p className="mt-2 text-sm text-muted-foreground">{r.mensagem}</p>}
-              <div className="mt-4 flex gap-2">
-                <Button size="sm" onClick={() => setStatus(r.id, "confirmada")}>Confirmar</Button>
-                <Button size="sm" variant="outline" onClick={() => setStatus(r.id, "cancelada")}>Cancelar</Button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button size="sm" disabled={confirmando === r.id || (r.status === "confirmada" && !r.email)} onClick={() => confirmarEEnviar(r.id)}>
+                  {confirmando === r.id ? "Enviando…" : !r.email && r.status === "confirmada" ? "Sem e-mail para reenviar" : !r.email ? "Confirmar (sem e-mail)" : r.status === "confirmada" ? "Reenviar e-mail" : "Confirmar e enviar e-mail"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={confirmando === r.id} onClick={() => setStatus(r.id, "cancelada")}>Cancelar</Button>
               </div>
+              {feedback[r.id] && <p className="mt-3 text-sm text-muted-foreground" role="status">{feedback[r.id]}</p>}
             </article>
           ))}
         </div>
