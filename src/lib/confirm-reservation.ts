@@ -80,16 +80,20 @@ export const confirmarReservaEEnviarEmail = createServerFn({ method: "POST" })
     }
 
     const reservation = reservationData as Reservation;
-    if (!reservation.email?.trim()) {
-      throw new Error("Esta reserva não possui e-mail. Peça ao cliente para informar um endereço válido.");
-    }
-
     if (reservation.status !== "confirmada") {
       const { error: updateError } = await client
         .from("reservas")
         .update({ status: "confirmada" })
         .eq("id", reservation.id);
       if (updateError) throw new Error("Não foi possível confirmar a reserva.");
+    }
+
+    if (!reservation.email?.trim()) {
+      return {
+        success: false,
+        confirmed: true,
+        message: "Reserva confirmada, mas esta reserva antiga não tem e-mail cadastrado. Peça o endereço ao cliente para enviar a confirmação.",
+      };
     }
 
     if (!resendApiKey || !resendFromEmail) {
