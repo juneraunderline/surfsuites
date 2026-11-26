@@ -32,7 +32,7 @@ function AuthPage() {
     setMsg(null);
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg("E-mail ou senha incorretos.");
+      if (error) setMsg(/confirm/i.test(error.message) ? "Confirme seu e-mail pelo link que enviamos antes de entrar." : "E-mail ou senha incorretos.");
       else navigate({ to: "/admin" });
     } else {
       const { error } = await supabase.auth.signUp({
@@ -40,7 +40,7 @@ function AuthPage() {
         password,
         options: { emailRedirectTo: `${window.location.origin}/admin` },
       });
-      setMsg(error ? error.message : "Conta criada! Confirme pelo link enviado ao seu e-mail.");
+      setMsg(error ? (error.status === 429 ? "Aguarde um minuto antes de tentar de novo. Se já se cadastrou, confira seu e-mail (e a caixa de spam)." : "Não foi possível criar a conta. Tente novamente.") : "Conta criada! Confirme pelo link enviado ao seu e-mail (veja também o spam).");
     }
     setLoading(false);
   }
