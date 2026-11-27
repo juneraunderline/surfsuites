@@ -61,7 +61,7 @@ function Index() {
         <div className="bg-sunset absolute inset-0" />
         <div className="relative mx-auto w-full max-w-5xl px-5 pb-14 text-primary-foreground">
           <p className="mb-3 flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-secondary"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
-          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">Pousada do Surf</h1>
+          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">Surf Suítes</h1>
           <p className="mt-4 max-w-md text-lg">A 50 metros da praia do centro. Suítes duplex para até 5 pessoas.</p>
           <Button asChild size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
             <a href="#reserva">Reservar agora</a>
