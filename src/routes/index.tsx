@@ -26,6 +26,7 @@ function Index() {
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [adultos, setAdultos] = useState(1);
   const [criancas, setCriancas] = useState(0);
 
   async function reservar(e: React.FormEvent<HTMLFormElement>) {
@@ -40,7 +41,7 @@ function Index() {
 
     const hospedes = Number(f.get("hospedes"));
     const quantidadeCriancas = Number(f.get("criancas") || 0);
-    if (quantidadeCriancas > hospedes) return setErro("A quantidade de crianças não pode ser maior que o total de hóspedes.");
+    if (hospedes + quantidadeCriancas > 8) return setErro("A hospedagem permite no máximo 8 pessoas no total, incluindo adultos e crianças.");
     const idadesCriancas = Array.from({ length: quantidadeCriancas }, (_, index) =>
       String(f.get(`idade_crianca_${index + 1}`) || "").trim()
     );
@@ -123,15 +124,20 @@ function Index() {
               <div className="space-y-2"><Label htmlFor="check_in">Entrada</Label><Input id="check_in" name="check_in" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="check_out">Saída</Label><Input id="check_out" name="check_out" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="hospedes">Hóspedes adultos</Label>
-                <select id="hospedes" name="hospedes" required className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+                <select id="hospedes" name="hospedes" value={adultos} onChange={(e) => { const quantidade = Number(e.target.value); setAdultos(quantidade); if (quantidade + criancas > 8) setCriancas(8 - quantidade); }} required className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
                   {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
                 </select>
               </div>
               <div className="space-y-2"><Label htmlFor="criancas">Há crianças na hospedagem?</Label>
                 <select id="criancas" name="criancas" value={criancas} onChange={(e) => setCriancas(Number(e.target.value))} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  {Array.from({ length: 9 }, (_, i) => i).map((n) => <option key={n} value={n}>{n === 0 ? "Não" : n === 1 ? "Sim, 1 criança" : `Sim, ${n} crianças`}</option>)}
+                  {Array.from({ length: 9 - adultos }, (_, i) => i).map((n) => <option key={n} value={n}>{n === 0 ? "Não" : n === 1 ? "Sim, 1 criança" : `Sim, ${n} crianças`}</option>)}
                 </select>
               </div>
+              {adultos + criancas === 8 && (
+                <p role="alert" className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm font-medium text-amber-800 md:col-span-2">
+                  Atenção: limite máximo de 8 hóspedes atingido. A contagem inclui adultos e crianças.
+                </p>
+              )}
               {criancas > 0 && (
                 <div className="grid gap-4 rounded-lg border p-4 md:col-span-2 sm:grid-cols-2">
                   <p className="font-semibold sm:col-span-2">Idade de cada criança</p>
