@@ -72,15 +72,15 @@ function Index() {
 
   return (
     <main>
-      <section className="relative h-[240px] overflow-hidden md:h-[280px] lg:h-[320px]">
+      <section className="relative h-[310px] overflow-hidden md:h-[280px] lg:h-[320px]">
         <img src="https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RcahhdV5oYmQt5xauyTz2-g8HPS2BGsggxm1axemV2QFkUf84jgJk5OoEB7jWPFVaDsXvTopZWDl5GX78OlhkTiLInwgXKNR0XLtPXDz3qeyc7jogHubTLYR4yrks1m87awf1U=s680-w680-h510-rw" alt="Fachada da Pousada Surf Suítes em Peruíbe" width={680} height={510} className="absolute inset-0 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 bg-black/45 md:bg-black/70" />
         <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
-            <p className="mb-4 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-secondary md:mb-3 md:text-sm"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
-            <img src={surfSuitesLogo} alt="Surf Suites" className="mb-3 w-full max-w-[280px] object-contain object-left md:mb-2 md:max-w-[310px]" />
+          <div className="mx-auto w-full max-w-5xl px-5 py-4 text-primary-foreground">
+            <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-secondary md:mb-3 md:text-sm"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
+            <img src={surfSuitesLogo} alt="Surf Suites" className="mb-2 w-full max-w-[240px] object-contain object-left md:mb-2 md:max-w-[310px]" />
             <p className="mt-0 max-w-md text-sm md:mt-2 md:text-base">A 50 metros da praia do centro. Suítes duplex para até 8 pessoas.</p>
-            <Button asChild size="lg" className="mx-auto mt-5 flex w-fit bg-accent text-accent-foreground hover:bg-accent/90 md:mx-0 md:mt-4">
+            <Button asChild size="lg" className="mx-auto mt-3 flex w-fit bg-accent text-accent-foreground hover:bg-accent/90 md:mx-0 md:mt-4">
               <a href="#reserva">Reservar agora</a>
             </Button>
           </div>
