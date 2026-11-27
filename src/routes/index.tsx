@@ -66,18 +66,61 @@ function Index() {
       ? `Crianças: ${quantidadeCriancas} (idades: ${idadesCriancas.map((idade) => `${idade} anos`).join(", ")}).`
       : "Crianças: não.";
     const mensagem = [mensagemLivre, detalhesCriancas].filter(Boolean).join("\n\n");
+    const nome = String(f.get("nome")).trim();
+    const telefone = String(f.get("telefone")).trim();
     const { error } = await supabase.from("reservas").insert({
-      nome: String(f.get("nome")).trim(),
-      telefone: String(f.get("telefone")).trim(),
+      nome,
+      telefone,
       email,
       mensagem: mensagem || null,
       check_in,
       check_out,
       hospedes,
     });
+
+    if (error) {
+      setLoading(false);
+      setErro("Não foi possível enviar. Confira os dados e tente novamente.");
+      return;
+    }
+
+    // A reserva é salva no Supabase e a notificação é enviada pelo navegador,
+    // seguindo o mesmo padrão usado no cadastro de bandas do Comunidade do Rock.
+    let notificacaoEmailOk = false;
+    try {
+      const emailResponse = await fetch("https://formsubmit.co/ajax/junior.lopes@yahoo.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          _subject: "Novo pedido de reserva - Surf Suítes",
+          _template: "table",
+          _replyto: email,
+          Tipo: "Novo pedido de reserva",
+          Hóspede: nome,
+          WhatsApp: telefone,
+          "E-mail do hóspede": email,
+          "Data de entrada": check_in,
+          "Data de saída": check_out,
+          "Hóspedes adultos": hospedes,
+          "Quantidade de crianças": quantidadeCriancas,
+          "Idades das crianças": quantidadeCriancas > 0 ? idadesCriancas.map((idade) => idade + " anos").join(", ") : "Não há crianças",
+          "Mensagem / observações": mensagemLivre || "Nenhuma",
+        }),
+      });
+      const emailResult = await emailResponse.json().catch(() => null);
+      notificacaoEmailOk = emailResponse.ok && !!emailResult && emailResult.success !== false && emailResult.success !== "false";
+      if (!notificacaoEmailOk) {
+        console.error("[Notificação de reserva] O FormSubmit não confirmou o envio.", emailResponse.status, emailResult);
+      }
+    } catch (emailError) {
+      console.error("[Notificação de reserva] Falha ao enviar e-mail pelo navegador:", emailError);
+    }
+
     setLoading(false);
-    if (error) setErro("Não foi possível enviar. Confira os dados e tente novamente.");
-    else setEnviado(true);
+    setEnviado(true);
+    if (!notificacaoEmailOk) {
+      console.warn("[Notificação de reserva] A reserva foi salva, mas o e-mail não foi confirmado.");
+    }
   }
 
   return (
