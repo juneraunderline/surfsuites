@@ -75,7 +75,7 @@ function Index() {
         {[
           { icon: Waves, t: "50 m da praia", d: "Acorde e caia no mar em um minuto." },
           { icon: Users, t: "Suítes duplex", d: "Espaço para até 5 pessoas." },
-          { icon: Star, t: "100% recomendam", d: "Avaliado por 28 hóspedes no Facebook." },
+          { icon: Star, t: "100% recomendam", d: "100% de avaliações positivas." },
         ].map(({ icon: Icon, t, d }) => (
           <div key={t} className="rounded-2xl bg-card p-6 shadow-sm">
             <Icon className="h-7 w-7 text-primary" />
