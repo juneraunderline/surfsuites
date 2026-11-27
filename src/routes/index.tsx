@@ -72,7 +72,7 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-6 px-5 py-16 md:grid-cols-3">
+      <section className="mx-auto grid max-w-5xl gap-6 px-5 py-8 md:grid-cols-3 md:py-16">
         {[
           { icon: Waves, t: "50 m da praia", d: "Acorde e caia no mar em um minuto." },
           { icon: Users, t: "Suítes duplex", d: "Espaço para até 5 pessoas." },
