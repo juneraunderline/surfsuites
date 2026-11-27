@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import hero from "@/assets/hero.jpg";
 import surfSuitesLogo from "@/assets/surf-suites-logo.png";
 
 export const Route = createFileRoute("/")({
@@ -58,7 +57,7 @@ function Index() {
   return (
     <main>
       <section className="relative h-[460px] overflow-hidden md:h-auto">
-        <img src={hero} alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover md:static md:h-auto md:object-contain" />
+        <img src="https://pousada-do-surf-1.allsaopaulohotels.com/data/Images/OriginalPhoto/14254/1425417/1425417706/image-peruibe-pousada-do-surf-1.JPEG" alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover md:static md:h-auto md:object-contain" />
         <div className="absolute inset-0 bg-black/45 md:bg-black/70" />
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
