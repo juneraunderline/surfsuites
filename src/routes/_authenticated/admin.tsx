@@ -87,7 +87,7 @@ function Admin() {
   }
 
   useEffect(() => {
-    if (!reservas) return;
+    if (isLoading) return;
     const idsAtuais = new Set(reservas.map((reserva) => reserva.id));
     if (reservasConhecidasRef.current === null) {
       reservasConhecidasRef.current = idsAtuais;
@@ -97,7 +97,7 @@ function Admin() {
     const chegouReservaNova = reservas.some((reserva) => !reservasConhecidasRef.current?.has(reserva.id));
     reservasConhecidasRef.current = idsAtuais;
     if (chegouReservaNova && somAtivo) tocarSino();
-  }, [reservas, somAtivo]);
+  }, [reservas, somAtivo, isLoading]);
 
   async function confirmarEEnviar(id: string) {
     setConfirmando(id);
@@ -156,8 +156,8 @@ function Admin() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-extrabold text-primary">Reservas</h1>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={ativarSom} disabled={somAtivo}>
-              {somAtivo ? "🔔 Som ativado" : "Ativar sino de novas reservas"}
+            <Button variant="outline" onClick={() => somAtivo ? setSomAtivo(false) : ativarSom()}>
+              {somAtivo ? "🔕 Desativar sino" : "🔔 Ativar sino de novas reservas"}
             </Button>
             <Button variant="outline" onClick={sair}>Sair</Button>
           </div>
