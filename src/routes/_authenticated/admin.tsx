@@ -275,7 +275,7 @@ function Admin() {
                 {r.email ? (
                   <a
                     className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}!\n\nSua reserva na SurfSuites está confirmada.\nEntrada: ${fmt(r.check_in)}\nSaída: ${fmt(r.check_out)}\nHóspedes: ${r.hospedes}\n\nAguardamos você!\nEquipe SurfSuites`)}`}
+                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${r.hospedes}. Aguardamos você! Equipe SurfSuites.`)}`}
                   >
                     Preparar e-mail
                   </a>
