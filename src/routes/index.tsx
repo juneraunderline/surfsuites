@@ -57,7 +57,7 @@ function Index() {
 
   return (
     <main>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-black pb-16 md:pb-0">
         <img src={hero} alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="block h-auto w-full object-contain" />
         <div className="absolute inset-0 bg-black/45" />
         <div className="absolute inset-0 flex items-center">
