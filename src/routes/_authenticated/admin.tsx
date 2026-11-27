@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { confirmarReservaEEnviarEmail } from "@/lib/confirm-reservation";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,9 @@ function Admin() {
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [excluindo, setExcluindo] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<string, string>>({});
+  const [somAtivo, setSomAtivo] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const reservasConhecidasRef = useRef<Set<string> | null>(null);
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin"],
     queryFn: async () => {
@@ -41,12 +44,60 @@ function Admin() {
   const { data: reservas = [], isLoading } = useQuery({
     queryKey: ["reservas"],
     enabled: isAdmin === true,
+    refetchInterval: 10000,
     queryFn: async () => {
       const { data, error } = await supabase.from("reservas").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
+  function tocarSino() {
+    const context = audioContextRef.current;
+    if (!context || context.state !== "running") return;
+
+    const tocarNota = (frequencia: number, inicio: number) => {
+      const oscillator = context.createOscillator();
+      const volume = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequencia, context.currentTime + inicio);
+      volume.gain.setValueAtTime(0.0001, context.currentTime + inicio);
+      volume.gain.exponentialRampToValueAtTime(0.22, context.currentTime + inicio + 0.015);
+      volume.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + inicio + 1.1);
+      oscillator.connect(volume);
+      volume.connect(context.destination);
+      oscillator.start(context.currentTime + inicio);
+      oscillator.stop(context.currentTime + inicio + 1.15);
+    };
+
+    // Duas badaladas curtas, lembrando o sino de balcão de hotel.
+    tocarNota(880, 0);
+    tocarNota(1174, 0.24);
+    tocarNota(1568, 0.48);
+  }
+
+  async function ativarSom() {
+    try {
+      if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+      await audioContextRef.current.resume();
+      setSomAtivo(true);
+    } catch {
+      setFeedback((current) => ({ ...current, geral: "Não foi possível ativar o som neste navegador." }));
+    }
+  }
+
+  useEffect(() => {
+    if (!reservas) return;
+    const idsAtuais = new Set(reservas.map((reserva) => reserva.id));
+    if (reservasConhecidasRef.current === null) {
+      reservasConhecidasRef.current = idsAtuais;
+      return;
+    }
+
+    const chegouReservaNova = reservas.some((reserva) => !reservasConhecidasRef.current?.has(reserva.id));
+    reservasConhecidasRef.current = idsAtuais;
+    if (chegouReservaNova && somAtivo) tocarSino();
+  }, [reservas, somAtivo]);
 
   async function confirmarEEnviar(id: string) {
     setConfirmando(id);
@@ -102,10 +153,17 @@ function Admin() {
   return (
     <main className="min-h-screen bg-muted px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-extrabold text-primary">Reservas</h1>
-          <Button variant="outline" onClick={sair}>Sair</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={ativarSom} disabled={somAtivo}>
+              {somAtivo ? "🔔 Som ativado" : "Ativar sino de novas reservas"}
+            </Button>
+            <Button variant="outline" onClick={sair}>Sair</Button>
+          </div>
         </div>
+        {feedback.geral && <p className="mb-4 text-sm text-destructive" role="alert">{feedback.geral}</p>}
+        {somAtivo && <p className="mb-4 text-sm text-muted-foreground">Aviso sonoro ligado. O painel verifica novas reservas a cada 10 segundos.</p>}
         {isAdmin === false && <p className="text-muted-foreground">Esta conta não tem acesso ao painel.</p>}
         {isAdmin && isLoading && <p className="text-muted-foreground">Carregando…</p>}
         {isAdmin && !isLoading && reservas.length === 0 && <p className="text-muted-foreground">Nenhuma reserva ainda.</p>}
