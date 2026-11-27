@@ -101,7 +101,7 @@ function Index() {
             <h3 className="mt-3 text-xl font-bold">{t}</h3>
             <p className="mt-1 text-muted-foreground">{d}</p>
             {t === "Valores a combinar" && (
-              <a href="https://wa.me/5513997539696" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex font-semibold text-primary underline underline-offset-4">Consultar pelo WhatsApp</a>
+              <a href="https://wa.me/5513997539696" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-[#1DA851] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"><MessageCircle className="h-5 w-5" /> Consultar pelo WhatsApp</a>
             )}
           </div>
         ))}
