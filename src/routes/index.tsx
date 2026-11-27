@@ -35,7 +35,6 @@ const hoje = () => new Date().toISOString().slice(0, 10);
 function Index() {
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [avisoEmail, setAvisoEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [adultos, setAdultos] = useState(1);
   const [criancas, setCriancas] = useState(0);
@@ -48,7 +47,7 @@ function Index() {
     if (check_out <= check_in) return setErro("A saída precisa ser depois da entrada.");
 
     const email = String(f.get("email") || "").trim();
-    if (!email) return setErro("Informe seu e-mail para receber a confirmação da reserva.");
+    if (!email) return setErro("Informe seu e-mail para contato.");
 
     const hospedes = Number(f.get("hospedes"));
     const quantidadeCriancas = Number(f.get("criancas") || 0);
@@ -85,48 +84,7 @@ function Index() {
       return;
     }
 
-    // A reserva é salva no Supabase e a notificação é enviada pelo navegador,
-    // seguindo o mesmo padrão usado no cadastro de bandas do Comunidade do Rock.
-    let notificacaoEmailOk = false;
-    let detalheFalhaEmail = "O serviço de e-mail não confirmou o recebimento da notificação.";
-    try {
-      const emailResponse = await fetch("https://formsubmit.co/ajax/junior.lopes@yahoo.com", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          _subject: "Novo pedido de reserva - Surf Suítes",
-          _template: "table",
-          _replyto: email,
-          Tipo: "Novo pedido de reserva",
-          Hóspede: nome,
-          WhatsApp: telefone,
-          "E-mail do hóspede": email,
-          "Data de entrada": check_in,
-          "Data de saída": check_out,
-          "Hóspedes adultos": hospedes,
-          "Quantidade de crianças": quantidadeCriancas,
-          "Idades das crianças": quantidadeCriancas > 0 ? idadesCriancas.map((idade) => idade + " anos").join(", ") : "Não há crianças",
-          "Mensagem / observações": mensagemLivre || "Nenhuma",
-        }),
-      });
-      const emailResult = await emailResponse.json().catch(() => null);
-      notificacaoEmailOk = emailResponse.ok && !!emailResult && String(emailResult.success).toLowerCase() === "true";
-      if (!notificacaoEmailOk) {
-        detalheFalhaEmail = emailResult?.message || detalheFalhaEmail;
-        console.error("[Notificação de reserva] O FormSubmit não confirmou o envio.", emailResponse.status, emailResult);
-      }
-    } catch (emailError) {
-      detalheFalhaEmail = "Não foi possível conectar ao serviço de e-mail. Verifique a conexão e tente novamente mais tarde.";
-      console.error("[Notificação de reserva] Falha ao enviar e-mail pelo navegador:", emailError);
-    }
-
     setLoading(false);
-    if (!notificacaoEmailOk) {
-      setAvisoEmail(`A reserva foi registrada, mas a notificação por e-mail falhou: ${detalheFalhaEmail}`);
-      console.warn("[Notificação de reserva] A reserva foi salva, mas o e-mail não foi confirmado.");
-    } else {
-      setAvisoEmail("A notificação por e-mail foi aceita pelo serviço.");
-    }
     setEnviado(true);
   }
 
@@ -175,7 +133,6 @@ function Index() {
             <div className="mt-8 rounded-2xl bg-card p-8 text-card-foreground">
               <h3 className="text-2xl font-bold">Pedido recebido! 🏄</h3>
               <p className="mt-2 text-muted-foreground">Entraremos em contato para confirmar sua reserva.</p>
-              {avisoEmail && <p className="mt-3 text-sm text-muted-foreground">{avisoEmail}</p>}
             </div>
           ) : (
             <form onSubmit={reservar} className="mt-8 grid gap-4 rounded-2xl bg-card p-6 text-card-foreground md:grid-cols-2">
