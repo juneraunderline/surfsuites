@@ -23,7 +23,7 @@ const fmt = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("pt-BR")
 
 function detalhesHospedes(reserva: { hospedes: number | string | null; mensagem?: string | null }) {
   const mensagemOriginal = String(reserva.mensagem || "");
-  const matchCriancas = mensagemOriginal.match(/\\s*Crianças:\\s*(\\d+)(?:\\s*\\(idades:\\s*([^)]+)\\))?\\.?/i);
+  const matchCriancas = mensagemOriginal.match(/\s*Crianças:\s*(\d+)(?:\s*\(idades:\s*([^)]+)\))?\.?/i);
   const criancas = matchCriancas ? Number(matchCriancas[1]) : 0;
   const idades = matchCriancas?.[2]?.trim();
   const adultos = Number(reserva.hospedes || 0);
