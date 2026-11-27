@@ -57,7 +57,7 @@ function Index() {
 
   return (
     <main>
-      <section className="relative h-[540px] overflow-hidden md:h-auto">
+      <section className="relative h-[460px] overflow-hidden md:h-auto">
         <img src={hero} alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover md:static md:h-auto md:object-contain" />
         <div className="absolute inset-0 bg-black/45" />
         <div className="absolute inset-0 flex items-center">
@@ -72,7 +72,7 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-6 px-5 py-8 md:grid-cols-3 md:py-16">
+      <section className="mx-auto grid max-w-5xl gap-6 px-5 py-4 md:grid-cols-3 md:py-16">
         {[
           { icon: Waves, t: "50 m da praia", d: "Acorde e caia no mar em um minuto." },
           { icon: Users, t: "Suítes duplex", d: "Espaço para até 5 pessoas." },
