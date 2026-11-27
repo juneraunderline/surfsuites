@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import hero from "@/assets/hero.jpg";
+import surfSuitesLogo from "@/assets/surf-suites-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -62,7 +63,7 @@ function Index() {
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
             <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-secondary md:mb-3 md:text-sm"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
-            <h1 className="text-4xl font-extrabold leading-tight md:text-7xl">Surf Suítes</h1>
+            <img src={surfSuitesLogo} alt="Surf Suites" className="-my-3 w-full max-w-[300px] object-contain object-left md:-my-5 md:max-w-[390px]" />
             <p className="mt-2 max-w-md text-sm md:mt-4 md:text-lg">A 50 metros da praia do centro. Suítes duplex para até 5 pessoas.</p>
             <Button asChild size="lg" className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90 md:mt-8">
               <a href="#reserva">Reservar agora</a>
