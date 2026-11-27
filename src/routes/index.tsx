@@ -56,8 +56,8 @@ function Index() {
 
   return (
     <main>
-      <section className="relative h-[360px] overflow-hidden md:h-[420px] lg:h-[460px]">
-        <img src="https://pousada-do-surf-1.allsaopaulohotels.com/data/Images/OriginalPhoto/14254/1425417/1425417706/image-peruibe-pousada-do-surf-1.JPEG" alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[center_72%]" />
+      <section className="relative h-[240px] overflow-hidden md:h-[280px] lg:h-[320px]">
+        <img src="https://pousada-do-surf-1.allsaopaulohotels.com/data/Images/OriginalPhoto/14254/1425417/1425417706/image-peruibe-pousada-do-surf-1.JPEG" alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[center_bottom]" />
         <div className="absolute inset-0 bg-black/45 md:bg-black/70" />
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
