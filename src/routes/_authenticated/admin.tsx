@@ -26,6 +26,7 @@ function Admin() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [confirmando, setConfirmando] = useState<string | null>(null);
+  const [excluindo, setExcluindo] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<string, string>>({});
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin"],
@@ -74,6 +75,23 @@ function Admin() {
     await qc.invalidateQueries({ queryKey: ["reservas"] });
   }
 
+  async function excluirReserva(id: string, nome: string) {
+    const confirmar = window.confirm(`Tem certeza que deseja excluir permanentemente a reserva de ${nome}? Essa ação não poderá ser desfeita.`);
+    if (!confirmar) return;
+
+    setExcluindo(id);
+    setFeedback((current) => ({ ...current, [id]: "" }));
+    const { error } = await supabase.from("reservas").delete().eq("id", id);
+    setExcluindo(null);
+
+    if (error) {
+      setFeedback((current) => ({ ...current, [id]: "Não foi possível excluir a reserva. Verifique suas permissões e tente novamente." }));
+      return;
+    }
+
+    await qc.invalidateQueries({ queryKey: ["reservas"] });
+  }
+
   async function sair() {
     await qc.cancelQueries();
     qc.clear();
@@ -114,7 +132,10 @@ function Admin() {
                 <Button size="sm" disabled={confirmando === r.id || (r.status === "confirmada" && !r.email)} onClick={() => confirmarEEnviar(r.id)}>
                   {confirmando === r.id ? "Enviando…" : !r.email && r.status === "confirmada" ? "Sem e-mail para reenviar" : !r.email ? "Confirmar (sem e-mail)" : r.status === "confirmada" ? "Reenviar e-mail" : "Confirmar e enviar e-mail"}
                 </Button>
-                <Button size="sm" variant="outline" disabled={confirmando === r.id} onClick={() => setStatus(r.id, "cancelada")}>Cancelar</Button>
+                <Button size="sm" variant="outline" disabled={confirmando === r.id || excluindo === r.id} onClick={() => setStatus(r.id, "cancelada")}>Cancelar</Button>
+                <Button size="sm" variant="destructive" disabled={confirmando === r.id || excluindo === r.id} onClick={() => excluirReserva(r.id, r.nome)}>
+                  {excluindo === r.id ? "Excluindo…" : "Excluir"}
+                </Button>
               </div>
               {feedback[r.id] && <p className="mt-3 text-sm text-muted-foreground" role="status">{feedback[r.id]}</p>}
             </article>
