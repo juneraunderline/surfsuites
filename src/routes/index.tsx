@@ -122,7 +122,7 @@ function Index() {
               <div className="space-y-2"><Label htmlFor="email">E-mail</Label><Input id="email" name="email" type="email" required maxLength={255} autoComplete="email" /></div>
               <div className="space-y-2"><Label htmlFor="check_in">Entrada</Label><Input id="check_in" name="check_in" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="check_out">Saída</Label><Input id="check_out" name="check_out" type="date" min={hoje()} required /></div>
-              <div className="space-y-2"><Label htmlFor="hospedes">Total de hóspedes (adultos + crianças)</Label>
+              <div className="space-y-2"><Label htmlFor="hospedes">Hóspedes adultos</Label>
                 <select id="hospedes" name="hospedes" required className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
                   {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
                 </select>
