@@ -86,7 +86,7 @@ function Index() {
       <section id="reserva" className="bg-primary px-5 py-16 text-primary-foreground">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-4xl font-extrabold">Faça sua reserva</h2>
-          <p className="mt-2 opacity-90">Envie seu pedido e a Helenice ou o Surf confirmam com você.</p>
+          <p className="mt-2 opacity-90">Envie seu pedido e a nossa equipe entrará em contato.</p>
           {enviado ? (
             <div className="mt-8 rounded-2xl bg-card p-8 text-card-foreground">
               <h3 className="text-2xl font-bold">Pedido recebido! 🏄</h3>
@@ -115,7 +115,7 @@ function Index() {
       </section>
 
       <footer className="mx-auto max-w-5xl space-y-2 px-5 py-10 text-sm text-muted-foreground">
-        <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Rua Erasmos Pinheiro Ribas, 11 — Peruíbe, SP</p>
+        <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Rua Erasmo Pinheiro Ribas, 11 — Peruíbe, SP</p>
         <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a className="underline" href="https://wa.me/5513997539696">+55 13 99753-9696</a></p>
         <p><Link to="/admin" className="underline">Área da pousada</Link></p>
       </footer>
