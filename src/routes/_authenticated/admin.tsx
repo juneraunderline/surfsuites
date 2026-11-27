@@ -256,7 +256,7 @@ function Admin() {
                 </Badge>
               </div>
               <p className="mt-2 text-sm">
-                <a className="text-primary underline" href={`https://wa.me/${r.telefone.replace(/\\D/g, "")}`} target="_blank" rel="noreferrer">{r.telefone}</a>
+                <a className="text-primary underline" href={`https://wa.me/${r.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">{r.telefone}</a>
                 {r.email ? <> · <a className="text-primary underline" href={`mailto:${r.email}`}>{r.email}</a></> : <> · <span className="text-destructive">E-mail não informado</span></>}
               </p>
               {r.mensagem && <p className="mt-2 text-sm text-muted-foreground">{r.mensagem}</p>}
@@ -266,7 +266,7 @@ function Admin() {
                 </Button>
                 <a
                   className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                  href={`https://wa.me/${r.telefone.replace(/\\D/g, "")}?text=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${r.hospedes}. Aguardamos você!`)}`}
+                  href={`https://wa.me/${r.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${r.hospedes}. Aguardamos você!`)}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -275,7 +275,7 @@ function Admin() {
                 {r.email ? (
                   <a
                     className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}!\\n\\nSua reserva na SurfSuites está confirmada.\\nEntrada: ${fmt(r.check_in)}\\nSaída: ${fmt(r.check_out)}\\nHóspedes: ${r.hospedes}\\n\\nAguardamos você!\\nEquipe SurfSuites`)}`}
+                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}!\n\nSua reserva na SurfSuites está confirmada.\nEntrada: ${fmt(r.check_in)}\nSaída: ${fmt(r.check_out)}\nHóspedes: ${r.hospedes}\n\nAguardamos você!\nEquipe SurfSuites`)}`}
                   >
                     Preparar e-mail
                   </a>
