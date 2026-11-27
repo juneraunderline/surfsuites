@@ -21,6 +21,25 @@ export const Route = createFileRoute("/_authenticated/admin")({
 type Status = "pendente" | "confirmada" | "cancelada";
 const fmt = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("pt-BR");
 
+function detalhesHospedes(reserva: { hospedes: number | string | null; mensagem?: string | null }) {
+  const mensagemOriginal = String(reserva.mensagem || "");
+  const matchCriancas = mensagemOriginal.match(/\\s*Crianças:\\s*(\\d+)(?:\\s*\\(idades:\\s*([^)]+)\\))?\\.?/i);
+  const criancas = matchCriancas ? Number(matchCriancas[1]) : 0;
+  const idades = matchCriancas?.[2]?.trim();
+  const adultos = Number(reserva.hospedes || 0);
+  const partes = [
+    `${adultos} hóspede${adultos === 1 ? "" : "s"} adulto${adultos === 1 ? "" : "s"}`,
+  ];
+  if (criancas > 0) {
+    partes.push(`${criancas} criança${criancas === 1 ? "" : "s"}${idades ? ` (idades: ${idades})` : ""}`);
+  }
+  return {
+    resumo: partes.join(" + "),
+    mensagem: mensagemOriginal.replace(matchCriancas?.[0] || "", "").trim(),
+    criancas,
+  };
+}
+
 // O WhatsApp exige o número internacional: código do Brasil (55) + DDD + telefone.
 const telefoneWhatsApp = (telefone: string) => {
   const digitos = String(telefone || "").replace(/\D/g, "").replace(/^0+/, "");
@@ -113,7 +132,7 @@ function Admin() {
   const canceladas = reservas.filter((r) => r.status === "cancelada");
   const chegadasHoje = reservas.filter((r) => r.status !== "cancelada" && r.check_in === hoje);
   const proximasChegadas = reservas.filter((r) => r.status !== "cancelada" && r.check_in >= hoje && r.check_in <= emSeteDias);
-  const totalHospedes = reservas.filter((r) => r.status !== "cancelada").reduce((total, r) => total + Number(r.hospedes || 0), 0);
+  const totalHospedes = reservas.filter((r) => r.status !== "cancelada").reduce((total, r) => total + Number(r.hospedes || 0) + detalhesHospedes(r).criancas, 0);
   const reservasFiltradas = reservas.filter((r) => {
     const correspondeStatus = filtro === "todas" || r.status === filtro;
     const termo = busca.trim().toLocaleLowerCase("pt-BR");
@@ -225,7 +244,7 @@ function Admin() {
                 <div className="divide-y">
                   {proximasChegadas.slice(0, 5).map((r) => (
                     <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                      <div><p className="font-semibold">{r.nome}</p><p className="text-sm text-muted-foreground">{fmt(r.check_in)} · {r.hospedes} hóspede(s)</p></div>
+                      <div><p className="font-semibold">{r.nome}</p><p className="text-sm text-muted-foreground">{fmt(r.check_in)} · {detalhesHospedes(r).resumo}</p></div>
                       <Badge variant={r.status === "confirmada" ? "default" : "secondary"}>{r.status}</Badge>
                     </div>
                   ))}
@@ -254,7 +273,7 @@ function Admin() {
                 <div>
                   <h2 className="text-lg font-bold">{r.nome}</h2>
                   <p className="text-sm text-muted-foreground">
-                    {fmt(r.check_in)} → {fmt(r.check_out)} · {r.hospedes} hóspede(s)
+                    {fmt(r.check_in)} → {fmt(r.check_out)} · {detalhesHospedes(r).resumo}
                   </p>
                 </div>
                 <Badge variant={r.status === "confirmada" ? "default" : r.status === "cancelada" ? "destructive" : "secondary"}>
@@ -265,7 +284,7 @@ function Admin() {
                 <a className="text-primary underline" href={`https://wa.me/${telefoneWhatsApp(r.telefone)}`} target="_blank" rel="noreferrer">{r.telefone}</a>
                 {r.email ? <> · <a className="text-primary underline" href={`mailto:${r.email}`}>{r.email}</a></> : <> · <span className="text-destructive">E-mail não informado</span></>}
               </p>
-              {r.mensagem && <p className="mt-2 text-sm text-muted-foreground">{r.mensagem}</p>}
+              {detalhesHospedes(r).mensagem && <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{detalhesHospedes(r).mensagem}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button size="sm" disabled={confirmando === r.id || r.status === "confirmada"} onClick={() => confirmarReserva(r.id)}>
                   {confirmando === r.id ? "Confirmando…" : r.status === "confirmada" ? "Reserva confirmada" : "Confirmar reserva"}
