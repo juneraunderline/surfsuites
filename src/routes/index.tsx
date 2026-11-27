@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Waves, MapPin, Phone, Users, Star, Flame, Utensils, Mountain, MessageCircle } from "lucide-react";
+import { Waves, MapPin, Phone, Users, Flame, Utensils, Mountain, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,7 @@ function Index() {
     setErro(null);
     const mensagemLivre = String(f.get("mensagem") || "").trim();
     const detalhesCriancas = quantidadeCriancas > 0
-      ? `Crianças: ${quantidadeCriancas} (idades: ${idadesCriancas.join(", ")} anos).`
+      ? `Crianças: ${quantidadeCriancas} (idades: ${idadesCriancas.map((idade) => `${idade} anos`).join(", ")}).`
       : "Crianças: não.";
     const mensagem = [mensagemLivre, detalhesCriancas].filter(Boolean).join("\n\n");
     const { error } = await supabase.from("reservas").insert({
