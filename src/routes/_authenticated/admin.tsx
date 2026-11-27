@@ -167,14 +167,14 @@ function Admin() {
   return (
     <main className="min-h-screen bg-muted px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="text-3xl font-extrabold text-primary">Reservas</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate({ to: "/" })}>Voltar ao site</Button>
-            <Button variant="outline" onClick={() => somAtivo ? setSomAtivo(false) : ativarSom()}>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+            <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/" })}>Voltar ao site</Button>
+            <Button className="w-full" variant="outline" onClick={sair}>Sair</Button>
+            <Button className="col-span-2 w-full sm:col-span-1 sm:w-auto" variant="outline" onClick={() => somAtivo ? setSomAtivo(false) : ativarSom()}>
               {somAtivo ? "🔕 Desativar sino" : "🔔 Ativar sino de novas reservas"}
             </Button>
-            <Button variant="outline" onClick={sair}>Sair</Button>
           </div>
         </div>
         {feedback.geral && <p className="mb-4 text-sm text-destructive" role="alert">{feedback.geral}</p>}
