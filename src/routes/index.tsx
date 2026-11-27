@@ -56,16 +56,18 @@ function Index() {
 
   return (
     <main>
-      <section className="relative flex min-h-0 flex-col items-end overflow-hidden md:min-h-[88vh]">
-        <img src={hero} alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="relative block h-auto w-full object-contain md:absolute md:inset-0 md:h-full md:w-full md:object-cover" />
-        <div className="bg-sunset absolute inset-0 hidden md:block" />
-        <div className="bg-sunset relative mx-auto w-full max-w-5xl px-5 pb-10 pt-8 text-primary-foreground md:bg-transparent md:pb-14 md:pt-0">
-          <p className="mb-3 flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-secondary"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
-          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">Surf Suítes</h1>
-          <p className="mt-4 max-w-md text-lg">A 50 metros da praia do centro. Suítes duplex para até 5 pessoas.</p>
-          <Button asChild size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
-            <a href="#reserva">Reservar agora</a>
-          </Button>
+      <section className="relative overflow-hidden">
+        <img src={hero} alt="Fachada da Pousada Surf Suítes em Peruíbe" width={1600} height={912} className="block h-auto w-full object-contain" />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
+            <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-secondary md:mb-3 md:text-sm"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
+            <h1 className="text-4xl font-extrabold leading-tight md:text-7xl">Surf Suítes</h1>
+            <p className="mt-2 max-w-md text-sm md:mt-4 md:text-lg">A 50 metros da praia do centro. Suítes duplex para até 5 pessoas.</p>
+            <Button asChild size="lg" className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90 md:mt-8">
+              <a href="#reserva">Reservar agora</a>
+            </Button>
+          </div>
         </div>
       </section>
 
