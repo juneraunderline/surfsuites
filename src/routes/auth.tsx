@@ -48,6 +48,9 @@ function AuthPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted px-4">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl bg-card p-8 shadow-lg">
+        <Button type="button" variant="outline" className="w-full" onClick={() => navigate({ to: "/" })}>
+          Voltar ao site
+        </Button>
         <h1 className="text-2xl font-extrabold text-primary">Painel da Pousada</h1>
         <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>
