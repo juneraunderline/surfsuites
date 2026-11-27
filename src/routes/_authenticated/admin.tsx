@@ -291,7 +291,7 @@ function Admin() {
                 </Button>
                 <a
                   className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                  href={`https://wa.me/${telefoneWhatsApp(r.telefone)}?text=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${r.hospedes}. Aguardamos você!`)}`}
+                  href={`https://wa.me/${telefoneWhatsApp(r.telefone)}?text=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${detalhesHospedes(r).resumo}. Aguardamos você!`)}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -300,7 +300,7 @@ function Admin() {
                 {r.email ? (
                   <a
                     className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${r.hospedes}. Aguardamos você! Equipe SurfSuites.`)}`}
+                    href={`mailto:${r.email}?subject=${encodeURIComponent("Confirmação de reserva - SurfSuites")}&body=${encodeURIComponent(`Olá, ${r.nome}! Sua reserva na SurfSuites está confirmada. Entrada: ${fmt(r.check_in)}. Saída: ${fmt(r.check_out)}. Hóspedes: ${detalhesHospedes(r).resumo}. Aguardamos você! Equipe SurfSuites.`)}`}
                   >
                     Preparar e-mail
                   </a>
