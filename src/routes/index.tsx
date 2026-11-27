@@ -57,8 +57,7 @@ function Index() {
   return (
     <main>
       <section className="relative h-[240px] overflow-hidden md:h-[280px] lg:h-[320px]">
-        <img src="https://pousada-do-surf-1.allsaopaulohotels.com/data/Images/OriginalPhoto/14254/1425417/1425417706/image-peruibe-pousada-do-surf-1.JPEG" alt="" aria-hidden="true" width={1600} height={912} className="absolute inset-0 h-full w-full scale-110 object-cover object-center blur-sm" />
-        <img src="https://pousada-do-surf-1.allsaopaulohotels.com/data/Images/OriginalPhoto/14254/1425417/1425417706/image-peruibe-pousada-do-surf-1.JPEG" alt="Fachada completa da Pousada Surf Suítes em Peruíbe, incluindo os portões" width={1600} height={912} className="absolute inset-0 h-full w-full object-contain object-center" />
+        <img src="https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RcahhdV5oYmQt5xauyTz2-g8HPS2BGsggxm1axemV2QFkUf84jgJk5OoEB7jWPFVaDsXvTopZWDl5GX78OlhkTiLInwgXKNR0XLtPXDz3qeyc7jogHubTLYR4yrks1m87awf1U=s680-w680-h510-rw" alt="Fachada da Pousada Surf Suítes em Peruíbe" width={680} height={510} className="absolute inset-0 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 bg-black/45 md:bg-black/70" />
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
