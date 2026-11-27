@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Waves, MapPin, Phone, Users, Star } from "lucide-react";
+import { Waves, MapPin, Phone, Users, Star, Flame, Utensils, Mountain, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Pousada do Surf — 50 m da praia em Peruíbe-SP" },
-      { name: "description", content: "Suítes duplex para até 5 pessoas a 50 metros da praia do centro de Peruíbe. Reserve online." },
+      { name: "description", content: "Suítes duplex para até 8 pessoas, com churrasqueira, cozinha equipada e vista para o mar e a montanha, a 50 metros da praia do centro de Peruíbe." },
       { property: "og:title", content: "Pousada do Surf — Peruíbe-SP" },
       { property: "og:description", content: "Suítes duplex a 50 m da praia. Reserve online." },
     ],
@@ -26,6 +26,7 @@ function Index() {
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [criancas, setCriancas] = useState(0);
 
   async function reservar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,9 +38,23 @@ function Index() {
     const email = String(f.get("email") || "").trim();
     if (!email) return setErro("Informe seu e-mail para receber a confirmação da reserva.");
 
+    const hospedes = Number(f.get("hospedes"));
+    const quantidadeCriancas = Number(f.get("criancas") || 0);
+    if (quantidadeCriancas > hospedes) return setErro("A quantidade de crianças não pode ser maior que o total de hóspedes.");
+    const idadesCriancas = Array.from({ length: quantidadeCriancas }, (_, index) =>
+      String(f.get(`idade_crianca_${index + 1}`) || "").trim()
+    );
+    if (idadesCriancas.some((idade) => idade === "" || Number(idade) < 0 || Number(idade) > 17)) {
+      return setErro("Informe a idade de cada criança.");
+    }
+
     setLoading(true);
     setErro(null);
-    const mensagem = String(f.get("mensagem") || "").trim();
+    const mensagemLivre = String(f.get("mensagem") || "").trim();
+    const detalhesCriancas = quantidadeCriancas > 0
+      ? `Crianças: ${quantidadeCriancas} (idades: ${idadesCriancas.join(", ")} anos).`
+      : "Crianças: não.";
+    const mensagem = [mensagemLivre, detalhesCriancas].filter(Boolean).join("\n\n");
     const { error } = await supabase.from("reservas").insert({
       nome: String(f.get("nome")).trim(),
       telefone: String(f.get("telefone")).trim(),
@@ -47,7 +62,7 @@ function Index() {
       mensagem: mensagem || null,
       check_in,
       check_out,
-      hospedes: Number(f.get("hospedes")),
+      hospedes,
     });
     setLoading(false);
     if (error) setErro("Não foi possível enviar. Confira os dados e tente novamente.");
@@ -63,7 +78,7 @@ function Index() {
           <div className="mx-auto w-full max-w-5xl px-5 text-primary-foreground">
             <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-secondary md:mb-3 md:text-sm"><Waves className="h-4 w-4" /> Peruíbe · SP</p>
             <img src={surfSuitesLogo} alt="Surf Suites" className="-my-2 w-full max-w-[280px] object-contain object-left md:-my-3 md:max-w-[310px]" />
-            <p className="mt-1 max-w-md text-sm md:mt-2 md:text-base">A 50 metros da praia do centro. Suítes duplex para até 5 pessoas.</p>
+            <p className="mt-1 max-w-md text-sm md:mt-2 md:text-base">A 50 metros da praia do centro. Suítes duplex para até 8 pessoas.</p>
             <Button asChild size="lg" className="mx-auto mt-3 flex w-fit bg-accent text-accent-foreground hover:bg-accent/90 md:mx-0 md:mt-4">
               <a href="#reserva">Reservar agora</a>
             </Button>
@@ -71,16 +86,22 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-6 px-5 py-4 md:grid-cols-3 md:py-16">
+      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-5 py-6 sm:grid-cols-2 lg:grid-cols-3 md:py-16">
         {[
-          { icon: Waves, t: "50 m da praia", d: "Acorde e caia no mar em um minuto." },
-          { icon: Users, t: "Suítes duplex", d: "Espaço para até 5 pessoas." },
-          { icon: Star, t: "100% recomendam", d: "100% de avaliações positivas." },
+          { icon: Waves, t: "50 metros da praia", d: "Aproveite a praia do centro de Peruíbe a poucos passos da pousada." },
+          { icon: Users, t: "Suítes duplex para até 8 pessoas", d: "Mais espaço e conforto para curtir a estadia com a família e os amigos." },
+          { icon: Flame, t: "Churrasqueira", d: "Suítes com churrasqueira para aproveitar bons momentos durante a hospedagem." },
+          { icon: Utensils, t: "Cozinha equipada", d: "Estrutura para preparar suas refeições, equipada para atender até 7 pessoas." },
+          { icon: Mountain, t: "Vista para o mar e a montanha", d: "Um cenário especial para aproveitar sua estadia em Peruíbe." },
+          { icon: MessageCircle, t: "Valores a combinar", d: "Consulte os valores e condições diretamente pelo nosso WhatsApp." },
         ].map(({ icon: Icon, t, d }) => (
           <div key={t} className="rounded-2xl bg-card p-6 shadow-sm">
             <Icon className="h-7 w-7 text-primary" />
             <h3 className="mt-3 text-xl font-bold">{t}</h3>
             <p className="mt-1 text-muted-foreground">{d}</p>
+            {t === "Valores a combinar" && (
+              <a href="https://wa.me/5513997539696" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex font-semibold text-primary underline underline-offset-4">Consultar pelo WhatsApp</a>
+            )}
           </div>
         ))}
       </section>
@@ -101,11 +122,27 @@ function Index() {
               <div className="space-y-2"><Label htmlFor="email">E-mail</Label><Input id="email" name="email" type="email" required maxLength={255} autoComplete="email" /></div>
               <div className="space-y-2"><Label htmlFor="check_in">Entrada</Label><Input id="check_in" name="check_in" type="date" min={hoje()} required /></div>
               <div className="space-y-2"><Label htmlFor="check_out">Saída</Label><Input id="check_out" name="check_out" type="date" min={hoje()} required /></div>
-              <div className="space-y-2"><Label htmlFor="hospedes">Hóspedes</Label>
-                <select id="hospedes" name="hospedes" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+              <div className="space-y-2"><Label htmlFor="hospedes">Total de hóspedes (adultos + crianças)</Label>
+                <select id="hospedes" name="hospedes" required className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} {n === 1 ? "pessoa" : "pessoas"}</option>)}
                 </select>
               </div>
+              <div className="space-y-2"><Label htmlFor="criancas">Há crianças na hospedagem?</Label>
+                <select id="criancas" name="criancas" value={criancas} onChange={(e) => setCriancas(Number(e.target.value))} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  {Array.from({ length: 9 }, (_, i) => i).map((n) => <option key={n} value={n}>{n === 0 ? "Não" : n === 1 ? "Sim, 1 criança" : `Sim, ${n} crianças`}</option>)}
+                </select>
+              </div>
+              {criancas > 0 && (
+                <div className="grid gap-4 rounded-lg border p-4 md:col-span-2 sm:grid-cols-2">
+                  <p className="font-semibold sm:col-span-2">Idade de cada criança</p>
+                  {Array.from({ length: criancas }, (_, i) => i + 1).map((n) => (
+                    <div key={n} className="space-y-2">
+                      <Label htmlFor={`idade_crianca_${n}`}>Idade da criança {n}</Label>
+                      <Input id={`idade_crianca_${n}`} name={`idade_crianca_${n}`} type="number" min="0" max="17" required placeholder="Idade em anos" />
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="space-y-2 md:col-span-2"><Label htmlFor="mensagem">Mensagem (opcional)</Label><Textarea id="mensagem" name="mensagem" maxLength={1000} /></div>
               {erro && <p className="text-sm text-destructive md:col-span-2">{erro}</p>}
               <Button type="submit" size="lg" disabled={loading} className="md:col-span-2 bg-accent text-accent-foreground hover:bg-accent/90">
