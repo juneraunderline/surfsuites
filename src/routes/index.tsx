@@ -11,18 +11,18 @@ import surfSuitesLogo from "@/assets/surf-suites-logo.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pousada do Surf — 50 m da praia em Peruíbe-SP" },
+      { title: "Pousada Surf Suites - Peruíbe - SP" },
       { name: "description", content: "Suítes duplex para até 8 pessoas, com churrasqueira, cozinha equipada e vista para o mar e a montanha, a 50 metros da praia do centro de Peruíbe." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://surfsuites.vercel.app/" },
-      { property: "og:title", content: "Surf Suítes — Pousada em Peruíbe-SP" },
+      { property: "og:title", content: "Pousada Surf Suites - Peruíbe - SP" },
       { property: "og:description", content: "Suítes duplex a 50 metros da praia, com churrasqueira e cozinha equipada. Consulte e reserve pelo WhatsApp." },
       { property: "og:image", content: "https://raw.githubusercontent.com/juneraunderline/surfsuites/main/src/assets/surf-suites-logo.png" },
       { property: "og:image:alt", content: "Logo Surf Suítes" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Surf Suítes — Pousada em Peruíbe-SP" },
+      { name: "twitter:title", content: "Pousada Surf Suites - Peruíbe - SP" },
       { name: "twitter:description", content: "Suítes duplex a 50 metros da praia em Peruíbe-SP." },
       { name: "twitter:image", content: "https://raw.githubusercontent.com/juneraunderline/surfsuites/main/src/assets/surf-suites-logo.png" },
     ],
