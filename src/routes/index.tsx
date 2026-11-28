@@ -5,6 +5,7 @@ import { VideoPlayer } from "@/components/video-player";
 import { Waves, MapPin, Phone, Users, Flame, Utensils, Mountain, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,14 +42,6 @@ function Index() {
       const { data, error } = await supabase.from("videos_pousada").select("id, titulo, descricao, url, plataforma").eq("ativo", true).order("ordem", { ascending: true }).order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    },
-  });
-  const { data: usuarioLogado } = useQuery({
-    queryKey: ["usuario-logado-rodape"],
-    queryFn: async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) return null;
-      return data.user;
     },
   });
   const [enviado, setEnviado] = useState(false);
@@ -222,7 +215,23 @@ function Index() {
       <footer className="mx-auto max-w-5xl space-y-3 px-5 py-10 text-center text-sm text-muted-foreground">
         <p className="flex items-center justify-center gap-2 text-center"><MapPin className="h-4 w-4 shrink-0" /> Rua Erasmo Pinheiro Ribas, 11 — Peruíbe, SP</p>
         <p className="flex items-center justify-center gap-2 text-center"><Phone className="h-4 w-4 shrink-0" /> <a className="underline" href="https://wa.me/5513997539696">+55 13 99753-9696</a></p>
-        <p className="flex flex-wrap items-center justify-center gap-4 text-center"><Link to={usuarioLogado ? "/hospede" : "/auth"} className="font-semibold text-primary underline">{usuarioLogado ? "Área do hóspede · Acessar meu guia" : "Área do hóspede · Criar conta ou entrar"}</Link><Link to="/admin" className="underline">Área da pousada</Link></p>
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="font-semibold">Painel</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-52">
+              <DropdownMenuLabel>Escolha sua área</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/hospede" className="w-full">Área do hóspede</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin" className="w-full">Área administrativa</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </footer>
       <div className="bg-black px-5 py-5 text-center text-xs text-white">
         <p>© {new Date().getFullYear()} Surf Suítes. Todos os direitos reservados.</p>
