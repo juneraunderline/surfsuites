@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,21 @@ function AuthPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    let ativo = true;
+    async function verificarSessao() {
+      const { data } = await supabase.auth.getSession();
+      if (!ativo || !data.session) return;
+      const { data: admin } = await supabase.rpc("has_role", {
+        _user_id: data.session.user.id,
+        _role: "admin",
+      });
+      if (ativo) navigate({ to: admin ? "/admin" : "/hospede", replace: true });
+    }
+    void verificarSessao();
+    return () => { ativo = false; };
+  }, [navigate]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -31,8 +46,6 @@ function AuthPage() {
         navigate({ to: admin ? "/admin" : "/hospede", replace: true });
       }
     } else {
-      // Evita reaproveitar uma sessão administrativa que já estava aberta neste navegador.
-      await supabase.auth.signOut();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
