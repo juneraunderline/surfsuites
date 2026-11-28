@@ -15,9 +15,9 @@ export type Database = {
   public: {
     Tables: {
       videos_pousada: {
-        Row: { ativo: boolean; created_at: string; descricao: string | null; id: string; ordem: number; plataforma: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo"; titulo: string; updated_at: string; url: string }
-        Insert: { ativo?: boolean; created_at?: string; descricao?: string | null; id?: string; ordem?: number; plataforma: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo"; titulo: string; updated_at?: string; url: string }
-        Update: { ativo?: boolean; created_at?: string; descricao?: string | null; id?: string; ordem?: number; plataforma?: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo"; titulo?: string; updated_at?: string; url?: string }
+        Row: { ativo: boolean; created_at: string; descricao: string | null; id: string; ordem: number; plataforma: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo" | "arquivo"; titulo: string; updated_at: string; url: string }
+        Insert: { ativo?: boolean; created_at?: string; descricao?: string | null; id?: string; ordem?: number; plataforma: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo" | "arquivo"; titulo: string; updated_at?: string; url: string }
+        Update: { ativo?: boolean; created_at?: string; descricao?: string | null; id?: string; ordem?: number; plataforma?: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo" | "arquivo"; titulo?: string; updated_at?: string; url?: string }
         Relationships: []
       }
       reservas: {
