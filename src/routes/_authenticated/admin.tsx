@@ -67,6 +67,7 @@ function Admin() {
   const [descricaoArquivo, setDescricaoArquivo] = useState("");
   const [ordemArquivo, setOrdemArquivo] = useState("0");
   const [enviandoArquivo, setEnviandoArquivo] = useState(false);
+  const [bucketPronto, setBucketPronto] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const reservasConhecidasRef = useRef<Set<string> | null>(null);
   const { data: isAdmin } = useQuery({
@@ -84,7 +85,10 @@ function Admin() {
     let cancelado = false;
     async function prepararBucket() {
       const { data, error } = await supabase.storage.getBucket("videos-pousada");
-      if (!error && data) return;
+      if (!error && data) {
+        if (!cancelado) setBucketPronto(true);
+        return;
+      }
       const { error: criarErro } = await supabase.storage.createBucket("videos-pousada", {
         public: true,
         fileSizeLimit: 50 * 1024 * 1024,
@@ -92,7 +96,9 @@ function Admin() {
       });
       if (criarErro && !cancelado) {
         setVideoFeedback("Não foi possível preparar o espaço de vídeos. " + criarErro.message);
+        return;
       }
+      if (!cancelado) setBucketPronto(true);
     }
     void prepararBucket();
     return () => { cancelado = true; };
@@ -414,7 +420,7 @@ function Admin() {
                   <textarea maxLength={300} rows={2} value={descricaoArquivo} onChange={(e) => setDescricaoArquivo(e.target.value)} placeholder="Uma breve descrição do vídeo" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
                 </label>
                 <div className="sm:col-span-2">
-                  <Button type="submit" disabled={enviandoArquivo || !arquivoVideo}>{enviandoArquivo ? "Enviando vídeo…" : "Enviar e publicar vídeo"}</Button>
+                  <Button type="submit" disabled={enviandoArquivo || !bucketPronto || !arquivoVideo}>{enviandoArquivo ? "Enviando vídeo…" : !bucketPronto ? "Preparando envio…" : "Enviar e publicar vídeo"}</Button>
                 </div>
               </form>
               <form onSubmit={adicionarVideo} className="mb-6 grid gap-3 rounded-xl bg-muted/50 p-4 sm:grid-cols-2">
