@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { VideoPlayer } from "@/components/video-player";
 import { Button } from "@/components/ui/button";
-import { Waves, MapPin, Compass, Utensils, ShoppingBag, HeartPulse, TreePine, Landmark, Sun, CloudRain, MessageCircle, LogOut, ExternalLink } from "lucide-react";
+import { Waves, MapPin, Compass, HeartPulse, Sun, CloudRain, MessageCircle, LogOut, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/hospede")({
   head: () => ({ meta: [{ title: "Guia do Hóspede — Surf Suítes" }, { name: "description", content: "Seu guia de hospedagem, lazer e turismo em Peruíbe." }, { name: "robots", content: "noindex" }] }),
