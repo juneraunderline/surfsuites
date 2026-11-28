@@ -38,6 +38,14 @@ export function getVideoEmbed(url: string): { platform: VideoPlatform; src: stri
 export function VideoPlayer({ url, title }: { url: string; title: string }) {
   const [erro, setErro] = useState(false);
   const embed = getVideoEmbed(url);
+  const arquivoDireto = /\\.(mp4|webm|mov|ogg)(?:$|[?#])/i.test(url);
+  if (arquivoDireto) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-black">
+        <video src={url} title={title} controls playsInline preload="metadata" className="h-full w-full object-contain" />
+      </div>
+    );
+  }
   if (!embed) {
     return <div className="flex aspect-video items-center justify-center bg-muted p-5 text-center text-sm text-muted-foreground">Este link não é de uma plataforma compatível ou não contém um vídeo público.</div>;
   }
