@@ -56,7 +56,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hospede': typeof HospedeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/guia-admin': typeof AuthenticatedGuiaAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,6 +67,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/hospede': typeof HospedeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/guia-admin': typeof AuthenticatedGuiaAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
