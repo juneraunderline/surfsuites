@@ -43,6 +43,7 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hospede': typeof HospedeRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRoutesByTo {
@@ -60,10 +61,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin'
+  fullPaths: '/' | '/auth' | '/hospede' | '/admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/admin'
+  to: '/' | '/auth' | '/hospede' | '/admin'
+  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/hospede' | '/_authenticated/admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
