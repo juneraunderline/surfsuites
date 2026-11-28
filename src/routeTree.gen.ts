@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HospedeRouteImport } from './routes/hospede'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedGuiaAdminRouteImport } from './routes/_authenticated/guia-admin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,6 +35,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedGuiaAdminRoute = AuthenticatedGuiaAdminRouteImport.update({
+  id: '/guia-admin',
+  path: '/guia-admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/hospede': typeof HospedeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/guia-admin': typeof AuthenticatedGuiaAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,10 +68,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/hospede' | '/admin'
+  fullPaths: '/' | '/auth' | '/hospede' | '/admin' | '/guia-admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/hospede' | '/admin'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/hospede' | '/_authenticated/admin'
+  to: '/' | '/auth' | '/hospede' | '/admin' | '/guia-admin'
+  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/hospede' | '/_authenticated/admin' | '/_authenticated/guia-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,6 +111,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HospedeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/guia-admin': {
+      id: '/_authenticated/guia-admin'
+      path: '/guia-admin'
+      fullPath: '/guia-admin'
+      preLoaderRoute: typeof AuthenticatedGuiaAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -116,10 +130,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedGuiaAdminRoute: typeof AuthenticatedGuiaAdminRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedGuiaAdminRoute: AuthenticatedGuiaAdminRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
