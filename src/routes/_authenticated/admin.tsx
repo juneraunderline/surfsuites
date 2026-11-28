@@ -424,6 +424,7 @@ function Admin() {
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="text-3xl font-extrabold text-primary">Reservas</h1>
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+            <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/guia-admin" })}>Editar guia do hóspede</Button>
             <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/" })}>Voltar ao site</Button>
             <Button className="w-full" variant="outline" onClick={sair}>Sair</Button>
             <Button className="col-span-2 w-full sm:col-span-1 sm:w-auto" variant="outline" onClick={() => somAtivo ? setSomAtivo(false) : ativarSom()}>
