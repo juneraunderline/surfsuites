@@ -31,12 +31,20 @@ function AuthPage() {
         navigate({ to: admin ? "/admin" : "/hospede", replace: true });
       }
     } else {
-      const { error } = await supabase.auth.signUp({
+      // Evita reaproveitar uma sessão administrativa que já estava aberta neste navegador.
+      await supabase.auth.signOut();
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/hospede` },
       });
-      setMsg(error ? `Falha ao criar conta (${error.status ?? "sem status"}): ${error.message}` : "Cadastro iniciado! Confirme seu e-mail pelo link enviado para acessar o Guia do Hóspede. Confira também o spam.");
+      if (error) {
+        setMsg(`Falha ao criar conta (${error.status ?? "sem status"}): ${error.message}`);
+      } else if (data.session) {
+        navigate({ to: "/hospede", replace: true });
+      } else {
+        setMsg("Cadastro iniciado! Confirme seu e-mail pelo link enviado. Depois, entre com sua conta para acessar o Guia do Hóspede. Confira também o spam.");
+      }
     }
     setLoading(false);
   }
