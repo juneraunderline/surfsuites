@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { VideoPlayer, getVideoEmbed } from "@/components/video-player";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -55,6 +56,12 @@ function Admin() {
   const [somAtivo, setSomAtivo] = useState(false);
   const [filtro, setFiltro] = useState<"todas" | Status>("todas");
   const [busca, setBusca] = useState("");
+  const [videoTitulo, setVideoTitulo] = useState("");
+  const [videoDescricao, setVideoDescricao] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoOrdem, setVideoOrdem] = useState("0");
+  const [salvandoVideo, setSalvandoVideo] = useState(false);
+  const [videoFeedback, setVideoFeedback] = useState("");
   const audioContextRef = useRef<AudioContext | null>(null);
   const reservasConhecidasRef = useRef<Set<string> | null>(null);
   const { data: isAdmin } = useQuery({
@@ -65,6 +72,15 @@ function Admin() {
       const { data, error } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
       if (error) throw error;
       return !!data;
+    },
+  });
+  const { data: videos = [], refetch: recarregarVideos } = useQuery({
+    queryKey: ["videos-pousada-admin"],
+    enabled: isAdmin === true,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("videos_pousada").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
     },
   });
   const { data: reservas = [], isLoading } = useQuery({
@@ -139,6 +155,57 @@ function Admin() {
     const correspondeBusca = !termo || [r.nome, r.email, r.telefone].some((v) => String(v || "").toLocaleLowerCase("pt-BR").includes(termo));
     return correspondeStatus && correspondeBusca;
   });
+
+  async function adicionarVideo(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const embed = getVideoEmbed(videoUrl.trim());
+    if (!embed) {
+      setVideoFeedback("Cole um link público do YouTube, Instagram, TikTok, Facebook ou Vimeo.");
+      return;
+    }
+    setSalvandoVideo(true);
+    setVideoFeedback("");
+    const { error } = await supabase.from("videos_pousada").insert({
+      titulo: videoTitulo.trim(),
+      descricao: videoDescricao.trim() || null,
+      url: videoUrl.trim(),
+      plataforma: embed.platform,
+      ordem: Number(videoOrdem) || 0,
+      ativo: true,
+    });
+    setSalvandoVideo(false);
+    if (error) {
+      setVideoFeedback("Não foi possível salvar o vídeo. Confira os dados e tente novamente.");
+      return;
+    }
+    setVideoTitulo("");
+    setVideoDescricao("");
+    setVideoUrl("");
+    setVideoOrdem("0");
+    setVideoFeedback("Vídeo adicionado à galeria!");
+    await recarregarVideos();
+  }
+
+  async function alternarVideo(id: string, ativo: boolean) {
+    const { error } = await supabase.from("videos_pousada").update({ ativo: !ativo, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) {
+      setVideoFeedback("Não foi possível atualizar a exibição do vídeo.");
+      return;
+    }
+    setVideoFeedback("Exibição do vídeo atualizada.");
+    await recarregarVideos();
+  }
+
+  async function excluirVideo(id: string, titulo: string) {
+    if (!window.confirm(`Excluir o vídeo "${titulo}" da galeria?`)) return;
+    const { error } = await supabase.from("videos_pousada").delete().eq("id", id);
+    if (error) {
+      setVideoFeedback("Não foi possível excluir o vídeo.");
+      return;
+    }
+    setVideoFeedback("Vídeo excluído da galeria.");
+    await recarregarVideos();
+  }
 
   async function confirmarReserva(id: string) {
     setConfirmando(id);
@@ -231,6 +298,62 @@ function Admin() {
                   </article>
                 ))}
               </div>
+            </section>
+            <section className="mb-8 rounded-2xl border bg-card p-4 sm:p-5">
+              <div className="mb-5">
+                <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Conteúdo do site</p>
+                <h2 className="text-2xl font-bold text-primary">Vídeos da pousada</h2>
+                <p className="text-sm text-muted-foreground">Adicione links públicos de redes sociais para exibir os vídeos na página inicial.</p>
+              </div>
+              <form onSubmit={adicionarVideo} className="mb-6 grid gap-3 rounded-xl bg-muted/50 p-4 sm:grid-cols-2">
+                <label className="space-y-1 text-sm font-medium sm:col-span-2">Link do vídeo
+                  <input type="url" required value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="Cole o link do YouTube, Instagram, TikTok, Facebook ou Vimeo" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <label className="space-y-1 text-sm font-medium">Título
+                  <input required minLength={2} maxLength={120} value={videoTitulo} onChange={(e) => setVideoTitulo(e.target.value)} placeholder="Ex.: Conheça nossa suíte" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <label className="space-y-1 text-sm font-medium">Ordem de exibição
+                  <input type="number" min="0" max="999" value={videoOrdem} onChange={(e) => setVideoOrdem(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <label className="space-y-1 text-sm font-medium sm:col-span-2">Descrição (opcional)
+                  <textarea maxLength={300} rows={2} value={videoDescricao} onChange={(e) => setVideoDescricao(e.target.value)} placeholder="Uma breve descrição do vídeo" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                {videoUrl && getVideoEmbed(videoUrl) && (
+                  <div className="sm:col-span-2">
+                    <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Prévia do player</p>
+                    <div className="max-w-xl overflow-hidden rounded-xl border">
+                      <VideoPlayer url={videoUrl} title={videoTitulo || "Prévia do vídeo"} />
+                    </div>
+                  </div>
+                )}
+                <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
+                  <Button type="submit" disabled={salvandoVideo}>{salvandoVideo ? "Salvando…" : "Adicionar vídeo"}</Button>
+                  {videoFeedback && <p role="status" className="text-sm text-muted-foreground">{videoFeedback}</p>}
+                </div>
+              </form>
+              {videos.length === 0 ? (
+                <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nenhum vídeo cadastrado ainda. Adicione o primeiro link acima.</p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {videos.map((video) => (
+                    <article key={video.id} className="overflow-hidden rounded-xl border bg-background">
+                      <VideoPlayer url={video.url} title={video.titulo} />
+                      <div className="space-y-2 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="font-bold">{video.titulo}</h3>
+                          <Badge variant={video.ativo ? "default" : "secondary"}>{video.ativo ? "Publicado" : "Oculto"}</Badge>
+                        </div>
+                        {video.descricao && <p className="text-sm text-muted-foreground">{video.descricao}</p>}
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground">{video.plataforma} · Ordem {video.ordem}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Button type="button" size="sm" variant="outline" onClick={() => alternarVideo(video.id, video.ativo)}>{video.ativo ? "Ocultar do site" : "Publicar no site"}</Button>
+                          <Button type="button" size="sm" variant="destructive" onClick={() => excluirVideo(video.id, video.titulo)}>Excluir</Button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </section>
             <section className="mb-8 rounded-2xl border bg-card p-4 sm:p-5">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
