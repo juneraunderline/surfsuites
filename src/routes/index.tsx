@@ -214,7 +214,7 @@ function Index() {
       <footer className="mx-auto max-w-5xl space-y-3 px-5 py-10 text-center text-sm text-muted-foreground">
         <p className="flex items-center justify-center gap-2 text-center"><MapPin className="h-4 w-4 shrink-0" /> Rua Erasmo Pinheiro Ribas, 11 — Peruíbe, SP</p>
         <p className="flex items-center justify-center gap-2 text-center"><Phone className="h-4 w-4 shrink-0" /> <a className="underline" href="https://wa.me/5513997539696">+55 13 99753-9696</a></p>
-        <p className="text-center"><Link to="/admin" className="underline">Área da pousada</Link></p>
+        <p className="flex flex-wrap items-center justify-center gap-4 text-center"><Link to="/auth" className="font-semibold text-primary underline">Área do hóspede · Criar conta ou entrar</Link><Link to="/admin" className="underline">Área da pousada</Link></p>
       </footer>
       <div className="bg-black px-5 py-5 text-center text-xs text-white">
         <p>© {new Date().getFullYear()} Surf Suítes. Todos os direitos reservados.</p>
