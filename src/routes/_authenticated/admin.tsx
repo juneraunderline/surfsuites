@@ -87,6 +87,10 @@ function Admin() {
     },
   });
   useEffect(() => {
+    if (isAdmin === false) navigate({ to: "/hospede", replace: true });
+  }, [isAdmin, navigate]);
+
+  useEffect(() => {
     if (isAdmin !== true) return;
     let cancelado = false;
     async function prepararBucket() {
@@ -424,6 +428,7 @@ function Admin() {
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="text-3xl font-extrabold text-primary">Reservas</h1>
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+            <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/hospede" })}>Abrir guia do hóspede</Button>
             <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/guia-admin" })}>Editar guia do hóspede</Button>
             <Button className="w-full" variant="outline" onClick={() => navigate({ to: "/" })}>Voltar ao site</Button>
             <Button className="w-full" variant="outline" onClick={sair}>Sair</Button>
