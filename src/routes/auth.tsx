@@ -6,15 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Entrar — Pousada do Surf" },
-      { name: "description", content: "Acesso ao painel de reservas da Pousada do Surf." },
-      { property: "og:title", content: "Entrar — Pousada do Surf" },
-      { property: "og:description", content: "Acesso ao painel de reservas." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Entrar — Surf Suítes" }, { name: "description", content: "Acesse seu guia de hóspede ou o painel da pousada." }, { name: "robots", content: "noindex" }] }),
   component: AuthPage,
 });
 
@@ -31,42 +23,34 @@ function AuthPage() {
     setLoading(true);
     setMsg(null);
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg(/confirm/i.test(error.message) ? "Confirme seu e-mail pelo link que enviamos antes de entrar." : "E-mail ou senha incorretos.");
-      else navigate({ to: "/admin" });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMsg(/confirm/i.test(error.message) ? "Confirme seu e-mail pelo link que enviamos antes de entrar." : "E-mail ou senha incorretos.");
+      } else if (data.user) {
+        const { data: admin } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
+        navigate({ to: admin ? "/admin" : "/hospede", replace: true });
+      }
     } else {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
+        options: { emailRedirectTo: `${window.location.origin}/hospede` },
       });
-      setMsg(error ? `Falha ao criar conta (${error.status ?? "sem status"}): ${error.message}` : "Conta criada! Confirme pelo link enviado ao seu e-mail (veja também o spam).");
+      setMsg(error ? `Falha ao criar conta (${error.status ?? "sem status"}): ${error.message}` : "Cadastro iniciado! Confirme seu e-mail pelo link enviado para acessar o Guia do Hóspede. Confira também o spam.");
     }
     setLoading(false);
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-4">
+    <main className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl bg-card p-8 shadow-lg">
-        <Button type="button" variant="outline" className="w-full" onClick={() => navigate({ to: "/" })}>
-          Voltar ao site
-        </Button>
-        <h1 className="text-2xl font-extrabold text-primary">Painel da Pousada</h1>
-        <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
-          <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        {msg && <p className="text-sm text-muted-foreground">{msg}</p>}
-        <Button type="submit" className="w-full" disabled={loading}>
-          {mode === "login" ? "Entrar" : "Criar conta"}
-        </Button>
-        <button type="button" className="w-full text-sm text-primary underline" onClick={() => setMode(mode === "login" ? "signup" : "login")}>
-          {mode === "login" ? "Primeiro acesso? Criar conta" : "Já tenho conta"}
-        </button>
+        <Button type="button" variant="outline" className="w-full" onClick={() => navigate({ to: "/" })}>Voltar ao site</Button>
+        <div><p className="text-xs font-bold uppercase tracking-widest text-primary">Surf Suítes · Peruíbe</p><h1 className="mt-2 text-2xl font-extrabold text-primary">{mode === "login" ? "Acesse sua área" : "Crie sua conta de hóspede"}</h1><p className="mt-1 text-sm text-muted-foreground">{mode === "login" ? "Entre para abrir seu guia de experiências ou o painel administrativo." : "Tenha dicas da pousada, passeios e informações úteis de Peruíbe."}</p></div>
+        <div className="space-y-2"><Label htmlFor="email">E-mail</Label><Input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+        <div className="space-y-2"><Label htmlFor="password">Senha</Label><Input id="password" type="password" required minLength={6} autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+        {msg && <p role="status" className="text-sm text-muted-foreground">{msg}</p>}
+        <Button type="submit" className="w-full" disabled={loading}>{loading ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar minha conta"}</Button>
+        <button type="button" className="w-full text-sm text-primary underline" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); }}>{mode === "login" ? "Sou novo por aqui — criar conta" : "Já tenho conta — entrar"}</button>
       </form>
     </main>
   );
