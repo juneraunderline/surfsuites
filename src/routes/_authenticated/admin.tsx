@@ -315,7 +315,7 @@ function Admin() {
       ordem: number;
       updated_at: string;
       url?: string;
-      plataforma?: string;
+      plataforma?: "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo";
     } = {
       titulo: editTitulo.trim(),
       descricao: editDescricao.trim() || null,
