@@ -205,7 +205,7 @@ function Admin() {
     });
     setSalvandoVideo(false);
     if (error) {
-      setVideoFeedback("Não foi possível salvar o vídeo. Confira os dados e tente novamente.");
+      setVideoFeedback("Não foi possível salvar o vídeo: " + error.message);
       return;
     }
     setVideoTitulo("");
