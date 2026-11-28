@@ -62,6 +62,11 @@ function Admin() {
   const [videoOrdem, setVideoOrdem] = useState("0");
   const [salvandoVideo, setSalvandoVideo] = useState(false);
   const [videoFeedback, setVideoFeedback] = useState("");
+  const [arquivoVideo, setArquivoVideo] = useState<File | null>(null);
+  const [tituloArquivo, setTituloArquivo] = useState("");
+  const [descricaoArquivo, setDescricaoArquivo] = useState("");
+  const [ordemArquivo, setOrdemArquivo] = useState("0");
+  const [enviandoArquivo, setEnviandoArquivo] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const reservasConhecidasRef = useRef<Set<string> | null>(null);
   const { data: isAdmin } = useQuery({
@@ -74,6 +79,25 @@ function Admin() {
       return !!data;
     },
   });
+  useEffect(() => {
+    if (isAdmin !== true) return;
+    let cancelado = false;
+    async function prepararBucket() {
+      const { data, error } = await supabase.storage.getBucket("videos-pousada");
+      if (!error && data) return;
+      const { error: criarErro } = await supabase.storage.createBucket("videos-pousada", {
+        public: true,
+        fileSizeLimit: 50 * 1024 * 1024,
+        allowedMimeTypes: ["video/mp4", "video/webm", "video/quicktime", "video/ogg"],
+      });
+      if (criarErro && !cancelado) {
+        setVideoFeedback("Não foi possível preparar o espaço de vídeos. " + criarErro.message);
+      }
+    }
+    void prepararBucket();
+    return () => { cancelado = true; };
+  }, [isAdmin]);
+
   const { data: videos = [], refetch: recarregarVideos } = useQuery({
     queryKey: ["videos-pousada-admin"],
     enabled: isAdmin === true,
@@ -186,6 +210,63 @@ function Admin() {
     await recarregarVideos();
   }
 
+  async function enviarArquivoVideo(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!arquivoVideo) {
+      setVideoFeedback("Selecione um vídeo do computador ou celular.");
+      return;
+    }
+    const tiposPermitidos = ["video/mp4", "video/webm", "video/quicktime", "video/ogg"];
+    if (!tiposPermitidos.includes(arquivoVideo.type)) {
+      setVideoFeedback("Formato não aceito. Envie MP4, WebM, MOV ou OGG.");
+      return;
+    }
+    const limite = 50 * 1024 * 1024;
+    if (arquivoVideo.size > limite) {
+      setVideoFeedback("O vídeo ultrapassa o limite de 50 MB.");
+      return;
+    }
+    if (tituloArquivo.trim().length < 2) {
+      setVideoFeedback("Informe um título com pelo menos 2 caracteres.");
+      return;
+    }
+
+    setEnviandoArquivo(true);
+    setVideoFeedback("");
+    const extensao = arquivoVideo.name.split(".").pop()?.toLowerCase() || "mp4";
+    const caminho = `${crypto.randomUUID()}.${extensao}`;
+    const { error: uploadError } = await supabase.storage
+      .from("videos-pousada")
+      .upload(caminho, arquivoVideo, { cacheControl: "3600", upsert: false, contentType: arquivoVideo.type });
+    if (uploadError) {
+      setEnviandoArquivo(false);
+      setVideoFeedback("Falha ao enviar o arquivo: " + uploadError.message);
+      return;
+    }
+    const { data: publicUrl } = supabase.storage.from("videos-pousada").getPublicUrl(caminho);
+    const { error: insertError } = await supabase.from("videos_pousada").insert({
+      titulo: tituloArquivo.trim(),
+      descricao: descricaoArquivo.trim() || null,
+      url: publicUrl.publicUrl,
+      plataforma: "arquivo",
+      ordem: Number(ordemArquivo) || 0,
+      ativo: true,
+    });
+    if (insertError) {
+      await supabase.storage.from("videos-pousada").remove([caminho]);
+      setEnviandoArquivo(false);
+      setVideoFeedback("O arquivo foi enviado, mas não foi possível cadastrá-lo na galeria: " + insertError.message);
+      return;
+    }
+    setArquivoVideo(null);
+    setTituloArquivo("");
+    setDescricaoArquivo("");
+    setOrdemArquivo("0");
+    setEnviandoArquivo(false);
+    setVideoFeedback("Vídeo enviado e publicado na galeria!");
+    await recarregarVideos();
+  }
+
   async function alternarVideo(id: string, ativo: boolean) {
     const { error } = await supabase.from("videos_pousada").update({ ativo: !ativo, updated_at: new Date().toISOString() }).eq("id", id);
     if (error) {
@@ -198,10 +279,19 @@ function Admin() {
 
   async function excluirVideo(id: string, titulo: string) {
     if (!window.confirm(`Excluir o vídeo "${titulo}" da galeria?`)) return;
+    const video = videos.find((item) => item.id === id);
     const { error } = await supabase.from("videos_pousada").delete().eq("id", id);
     if (error) {
-      setVideoFeedback("Não foi possível excluir o vídeo.");
+      setVideoFeedback("Não foi possível excluir o vídeo: " + error.message);
       return;
+    }
+    if (video?.plataforma === "arquivo") {
+      const marcador = "/storage/v1/object/public/videos-pousada/";
+      const indice = video.url.indexOf(marcador);
+      if (indice >= 0) {
+        const caminho = decodeURIComponent(video.url.slice(indice + marcador.length));
+        await supabase.storage.from("videos-pousada").remove([caminho]);
+      }
     }
     setVideoFeedback("Vídeo excluído da galeria.");
     await recarregarVideos();
@@ -303,9 +393,32 @@ function Admin() {
               <div className="mb-5">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Conteúdo do site</p>
                 <h2 className="text-2xl font-bold text-primary">Vídeos da pousada</h2>
-                <p className="text-sm text-muted-foreground">Adicione links públicos de redes sociais para exibir os vídeos na página inicial.</p>
+                <p className="text-sm text-muted-foreground">Envie arquivos do computador ou celular, ou adicione links públicos de redes sociais.</p>
               </div>
+              <form onSubmit={enviarArquivoVideo} className="mb-6 grid gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <h3 className="font-semibold text-primary">Enviar vídeo do dispositivo</h3>
+                  <p className="text-xs text-muted-foreground">Escolha um arquivo na pasta do computador ou na galeria do celular. Limite: 50 MB por vídeo.</p>
+                </div>
+                <label className="space-y-1 text-sm font-medium sm:col-span-2">Arquivo de vídeo
+                  <input type="file" required accept="video/mp4,video/webm,video/quicktime,video/ogg,.mp4,.webm,.mov,.ogg" onChange={(e) => setArquivoVideo(e.target.files?.[0] || null)} className="w-full rounded-md border bg-background px-3 py-2 font-normal file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-primary-foreground" />
+                </label>
+                {arquivoVideo && <p className="text-xs text-muted-foreground sm:col-span-2">{arquivoVideo.name} · {(arquivoVideo.size / (1024 * 1024)).toFixed(1)} MB</p>}
+                <label className="space-y-1 text-sm font-medium">Título
+                  <input required minLength={2} maxLength={120} value={tituloArquivo} onChange={(e) => setTituloArquivo(e.target.value)} placeholder="Ex.: Nossa suíte por dentro" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <label className="space-y-1 text-sm font-medium">Ordem de exibição
+                  <input type="number" min="0" max="999" value={ordemArquivo} onChange={(e) => setOrdemArquivo(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <label className="space-y-1 text-sm font-medium sm:col-span-2">Descrição (opcional)
+                  <textarea maxLength={300} rows={2} value={descricaoArquivo} onChange={(e) => setDescricaoArquivo(e.target.value)} placeholder="Uma breve descrição do vídeo" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                </label>
+                <div className="sm:col-span-2">
+                  <Button type="submit" disabled={enviandoArquivo || !arquivoVideo}>{enviandoArquivo ? "Enviando vídeo…" : "Enviar e publicar vídeo"}</Button>
+                </div>
+              </form>
               <form onSubmit={adicionarVideo} className="mb-6 grid gap-3 rounded-xl bg-muted/50 p-4 sm:grid-cols-2">
+                <div className="sm:col-span-2"><h3 className="font-semibold text-primary">Ou adicionar por link</h3><p className="text-xs text-muted-foreground">Para vídeos que já estão publicados no YouTube, Instagram, TikTok, Facebook ou Vimeo.</p></div>
                 <label className="space-y-1 text-sm font-medium sm:col-span-2">Link do vídeo
                   <input type="url" required value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="Cole o link do YouTube, Instagram, TikTok, Facebook ou Vimeo" className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
                 </label>
