@@ -61,6 +61,12 @@ function Admin() {
   const [videoUrl, setVideoUrl] = useState("");
   const [videoOrdem, setVideoOrdem] = useState("0");
   const [salvandoVideo, setSalvandoVideo] = useState(false);
+  const [editandoVideoId, setEditandoVideoId] = useState<string | null>(null);
+  const [editTitulo, setEditTitulo] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editOrdem, setEditOrdem] = useState("0");
+  const [salvandoEdicaoVideo, setSalvandoEdicaoVideo] = useState(false);
   const [videoFeedback, setVideoFeedback] = useState("");
   const [arquivoVideo, setArquivoVideo] = useState<File | null>(null);
   const [tituloArquivo, setTituloArquivo] = useState("");
@@ -273,6 +279,66 @@ function Admin() {
     await recarregarVideos();
   }
 
+  function iniciarEdicaoVideo(video: (typeof videos)[number]) {
+    setEditandoVideoId(video.id);
+    setEditTitulo(video.titulo);
+    setEditDescricao(video.descricao || "");
+    setEditUrl(video.plataforma === "arquivo" ? "" : video.url);
+    setEditOrdem(String(video.ordem ?? 0));
+    setVideoFeedback("");
+  }
+
+  function cancelarEdicaoVideo() {
+    setEditandoVideoId(null);
+    setEditTitulo("");
+    setEditDescricao("");
+    setEditUrl("");
+    setEditOrdem("0");
+  }
+
+  async function salvarEdicaoVideo(e: React.FormEvent<HTMLFormElement>, video: (typeof videos)[number]) {
+    e.preventDefault();
+    if (editTitulo.trim().length < 2) {
+      setVideoFeedback("Informe um título com pelo menos 2 caracteres.");
+      return;
+    }
+    if (video.plataforma !== "arquivo" && !getVideoEmbed(editUrl.trim())) {
+      setVideoFeedback("O link informado não é compatível. Use YouTube, Instagram, TikTok, Facebook ou Vimeo.");
+      return;
+    }
+
+    setSalvandoEdicaoVideo(true);
+    setVideoFeedback("");
+    const atualizacao: {
+      titulo: string;
+      descricao: string | null;
+      ordem: number;
+      updated_at: string;
+      url?: string;
+      plataforma?: string;
+    } = {
+      titulo: editTitulo.trim(),
+      descricao: editDescricao.trim() || null,
+      ordem: Number(editOrdem) || 0,
+      updated_at: new Date().toISOString(),
+    };
+    if (video.plataforma !== "arquivo") {
+      const embed = getVideoEmbed(editUrl.trim())!;
+      atualizacao.url = editUrl.trim();
+      atualizacao.plataforma = embed.platform;
+    }
+
+    const { error } = await supabase.from("videos_pousada").update(atualizacao).eq("id", video.id);
+    setSalvandoEdicaoVideo(false);
+    if (error) {
+      setVideoFeedback("Não foi possível salvar as alterações: " + error.message);
+      return;
+    }
+    cancelarEdicaoVideo();
+    setVideoFeedback("Dados do vídeo atualizados com sucesso.");
+    await recarregarVideos();
+  }
+
   async function alternarVideo(id: string, ativo: boolean) {
     const { error } = await supabase.from("videos_pousada").update({ ativo: !ativo, updated_at: new Date().toISOString() }).eq("id", id);
     if (error) {
@@ -464,10 +530,36 @@ function Admin() {
                         </div>
                         {video.descricao && <p className="text-sm text-muted-foreground">{video.descricao}</p>}
                         <p className="text-xs uppercase tracking-wider text-muted-foreground">{video.plataforma} · Ordem {video.ordem}</p>
-                        <div className="flex flex-wrap gap-2">
-                          <Button type="button" size="sm" variant="outline" onClick={() => alternarVideo(video.id, video.ativo)}>{video.ativo ? "Ocultar do site" : "Publicar no site"}</Button>
-                          <Button type="button" size="sm" variant="destructive" onClick={() => excluirVideo(video.id, video.titulo)}>Excluir</Button>
-                        </div>
+                        {editandoVideoId === video.id ? (
+                          <form onSubmit={(e) => salvarEdicaoVideo(e, video)} className="grid gap-3 rounded-lg border bg-muted/40 p-3">
+                            <p className="text-sm font-semibold text-primary">Editar dados do vídeo</p>
+                            <label className="space-y-1 text-sm font-medium">Título
+                              <input required minLength={2} maxLength={120} value={editTitulo} onChange={(e) => setEditTitulo(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                            </label>
+                            {video.plataforma !== "arquivo" && (
+                              <label className="space-y-1 text-sm font-medium">Link do vídeo
+                                <input type="url" required value={editUrl} onChange={(e) => setEditUrl(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                              </label>
+                            )}
+                            {video.plataforma === "arquivo" && <p className="text-xs text-muted-foreground">Este vídeo foi enviado como arquivo. O arquivo original será mantido; aqui você pode alterar o título, a descrição e a ordem.</p>}
+                            <label className="space-y-1 text-sm font-medium">Descrição
+                              <textarea maxLength={300} rows={2} value={editDescricao} onChange={(e) => setEditDescricao(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                            </label>
+                            <label className="space-y-1 text-sm font-medium">Ordem de exibição
+                              <input type="number" min="0" max="999" value={editOrdem} onChange={(e) => setEditOrdem(e.target.value)} className="w-full rounded-md border bg-background px-3 py-2 font-normal" />
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              <Button type="submit" size="sm" disabled={salvandoEdicaoVideo}>{salvandoEdicaoVideo ? "Salvando…" : "Salvar alterações"}</Button>
+                              <Button type="button" size="sm" variant="outline" disabled={salvandoEdicaoVideo} onClick={cancelarEdicaoVideo}>Cancelar</Button>
+                            </div>
+                          </form>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            <Button type="button" size="sm" variant="outline" onClick={() => iniciarEdicaoVideo(video)}>Editar dados</Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => alternarVideo(video.id, video.ativo)}>{video.ativo ? "Ocultar do site" : "Publicar no site"}</Button>
+                            <Button type="button" size="sm" variant="destructive" onClick={() => excluirVideo(video.id, video.titulo)}>Excluir</Button>
+                          </div>
+                        )}
                       </div>
                     </article>
                   ))}
