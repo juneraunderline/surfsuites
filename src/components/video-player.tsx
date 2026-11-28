@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, Video } from "lucide-react";
+import { Play } from "lucide-react";
 
 export type VideoPlatform = "youtube" | "instagram" | "tiktok" | "facebook" | "vimeo";
 
