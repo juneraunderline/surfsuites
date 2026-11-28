@@ -11,19 +11,6 @@ export const Route = createFileRoute("/hospede")({
   component: GuiaHospede,
 });
 
-const atracoes = [
-  { nome: "Praia do Centro", tipo: "Praia", descricao: "Orla urbanizada com calçadão, ciclovia, jardins e quiosques. É a opção prática para curtir o mar pertinho da pousada.", busca: "Praia do Centro Peruíbe SP", icone: Waves },
-  { nome: "Praia do Costão", tipo: "Praia e natureza", descricao: "Costão rochoso, vegetação e uma bica natural de água doce. Um passeio bonito para conhecer a paisagem do litoral.", busca: "Praia do Costão Peruíbe SP", icone: Waves },
-  { nome: "Guaraú e Rio Guaraú", tipo: "Natureza", descricao: "Região de praia, rio e manguezal, porta de entrada para passeios ecológicos e paisagens preservadas.", busca: "Praia do Guaraú Peruíbe SP", icone: TreePine },
-  { nome: "Ruínas do Abarebebê", tipo: "História", descricao: "Sítio histórico ligado à ocupação portuguesa do século XVI e à história indígena da região. Consulte o funcionamento antes de ir.", busca: "Ruínas do Abarebebê Peruíbe", icone: Landmark },
-  { nome: "Aquário Municipal", tipo: "Passeio em família", descricao: "Uma opção de passeio urbano para conhecer espécies marinhas. Confirme horários e funcionamento antes da visita.", busca: "Aquário Municipal de Peruíbe", icone: Waves },
-  { nome: "Feiras de artesanato", tipo: "Compras e cultura", descricao: "Conheça o artesanato local e aproveite as praças e o comércio do Centro.", busca: "Feira de artesanato Praça Redonda Peruíbe", icone: ShoppingBag },
-  { nome: "Colônia Veneza e Capela de Mosaicos", tipo: "Cultura", descricao: "Um passeio cultural para apreciar a capela decorada com mosaicos e conhecer outro lado da cidade.", busca: "Colônia Veneza Capela de Mosaicos Peruíbe", icone: Landmark },
-  { nome: "Cachoeira do Paraíso", tipo: "Ecoturismo", descricao: "Atração natural na região da Jureia-Itatins. O acesso pode depender de regras ambientais, condições da trilha e autorização; informe-se antes de sair.", busca: "Cachoeira do Paraíso Peruíbe", icone: TreePine },
-  { nome: "Corredeiras do Perequê", tipo: "Aventura", descricao: "Trecho de rio conhecido pelas águas e piscinas naturais. Verifique acesso, condições do tempo e orientações locais.", busca: "Corredeiras do Perequê Peruíbe", icone: TreePine },
-  { nome: "Lama Negra de Peruíbe", tipo: "Bem-estar", descricao: "Uma das experiências tradicionais da cidade, associada ao turismo de saúde e bem-estar. Consulte o Complexo Termal para informações atualizadas.", busca: "Complexo Termal Lama Negra Peruíbe", icone: HeartPulse },
-];
-
 const dicas = [
   { titulo: "Dia de sol", texto: "Praia do Centro pela manhã, almoço na região central e fim de tarde no Costão ou no Guaraú." , icon: Sun },
   { titulo: "Dia nublado ou chuvoso", texto: "Aproveite o comércio do Centro, feiras de artesanato, Museu Histórico e outros passeios culturais — confirme horários antes.", icon: CloudRain },
@@ -43,6 +30,16 @@ function GuiaHospede() {
   useEffect(() => {
     if (!carregandoUsuario && !user) navigate({ to: "/auth", search: { redirect: "/hospede" } as never, replace: true });
   }, [carregandoUsuario, user, navigate]);
+
+  const { data: atracoes = [] } = useQuery({
+    queryKey: ["guia-hospede-conteudo"],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("guia_hospede").select("id,titulo,categoria,descricao,busca_mapa,ordem").eq("ativo", true).order("ordem", { ascending: true }).order("titulo");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: videos = [] } = useQuery({
     queryKey: ["guia-hospede-videos"],
@@ -79,7 +76,7 @@ function GuiaHospede() {
 
         {videos.length > 0 && <section><div className="mb-5"><p className="text-xs font-bold uppercase tracking-widest text-primary">Conheça por dentro</p><h2 className="mt-1 text-2xl font-extrabold">Entretenimento e espaços da pousada</h2><p className="mt-1 text-sm text-muted-foreground">Assista aos vídeos publicados pela Surf Suítes.</p></div><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{videos.map((v) => <article key={v.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm"><VideoPlayer url={v.url} title={v.titulo} /><div className="p-4"><h3 className="font-bold">{v.titulo}</h3>{v.descricao && <p className="mt-1 text-sm text-muted-foreground">{v.descricao}</p>}</div></article>)}</div></section>}
 
-        <section><div className="mb-5 flex items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Explore a região</p><h2 className="mt-1 text-2xl font-extrabold">O que conhecer em Peruíbe</h2><p className="mt-1 text-sm text-muted-foreground">Ideias de passeios para diferentes estilos de viagem.</p></div><Compass className="hidden h-9 w-9 text-primary sm:block" /></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{atracoes.map((a) => { const Icon = a.icone; return <article key={a.nome} className="flex flex-col rounded-2xl border bg-card p-5 shadow-sm"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-primary" /><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">{a.tipo}</span></div><h3 className="mt-4 text-lg font-bold">{a.nome}</h3><p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{a.descricao}</p><a className="mt-4 inline-flex items-center gap-2 font-semibold text-primary underline" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.busca)}`} target="_blank" rel="noreferrer"><MapPin className="h-4 w-4" /> Ver no mapa <ExternalLink className="h-3 w-3" /></a></article>})}</div></section>
+        <section><div className="mb-5 flex items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Explore a região</p><h2 className="mt-1 text-2xl font-extrabold">O que conhecer em Peruíbe</h2><p className="mt-1 text-sm text-muted-foreground">Ideias de passeios para diferentes estilos de viagem.</p></div><Compass className="hidden h-9 w-9 text-primary sm:block" /></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{atracoes.map((a) => { return <article key={a.id} className="flex flex-col rounded-2xl border bg-card p-5 shadow-sm"><div className="flex items-center justify-between"><MapPin className="h-7 w-7 text-primary" /><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">{a.categoria}</span></div><h3 className="mt-4 text-lg font-bold">{a.titulo}</h3><p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{a.descricao}</p><a className="mt-4 inline-flex items-center gap-2 font-semibold text-primary underline" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.busca_mapa)}`} target="_blank" rel="noreferrer"><MapPin className="h-4 w-4" /> Ver no mapa <ExternalLink className="h-3 w-3" /></a></article>})}</div></section>
 
         <section><div className="mb-5"><p className="text-xs font-bold uppercase tracking-widest text-primary">Escolha seu clima</p><h2 className="mt-1 text-2xl font-extrabold">Dicas para aproveitar cada dia</h2></div><div className="grid gap-4 md:grid-cols-3">{dicas.map((d) => { const Icon = d.icon; return <article key={d.titulo} className="rounded-2xl bg-muted p-5"><Icon className="h-7 w-7 text-primary" /><h3 className="mt-3 font-bold">{d.titulo}</h3><p className="mt-2 text-sm text-muted-foreground">{d.texto}</p></article>})}</div></section>
 
