@@ -40,7 +40,7 @@ function AuthPage() {
         password,
         options: { emailRedirectTo: `${window.location.origin}/admin` },
       });
-      setMsg(error ? (error.status === 429 ? "Aguarde um minuto antes de tentar de novo. Se já se cadastrou, confira seu e-mail (e a caixa de spam)." : "Não foi possível criar a conta. Tente novamente.") : "Conta criada! Confirme pelo link enviado ao seu e-mail (veja também o spam).");
+      setMsg(error ? `Falha ao criar conta (${error.status ?? "sem status"}): ${error.message}` : "Conta criada! Confirme pelo link enviado ao seu e-mail (veja também o spam).");
     }
     setLoading(false);
   }
