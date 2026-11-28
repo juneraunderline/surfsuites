@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { VideoPlayer } from "@/components/video-player";
 import { Waves, MapPin, Phone, Users, Flame, Utensils, Mountain, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,14 @@ export const Route = createFileRoute("/")({
 const hoje = () => new Date().toISOString().slice(0, 10);
 
 function Index() {
+  const { data: videos = [] } = useQuery({
+    queryKey: ["videos-pousada-publicos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("videos_pousada").select("id, titulo, descricao, url, plataforma").eq("ativo", true).order("ordem", { ascending: true }).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -124,6 +134,30 @@ function Index() {
           </div>
         ))}
       </section>
+
+      {videos.length > 0 && (
+        <section id="videos" className="bg-muted/60 px-5 py-14 md:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto mb-9 max-w-2xl text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Um pouco da nossa experiência</span>
+              <h2 className="mt-2 text-3xl font-extrabold text-primary md:text-4xl">Conheça a pousada em vídeo</h2>
+              <p className="mt-3 text-muted-foreground">Veja os espaços, os detalhes e tudo o que espera por você na Surf Suítes.</p>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((video) => (
+                <article key={video.id} className="overflow-hidden rounded-2xl border bg-card shadow-md transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <VideoPlayer url={video.url} title={video.titulo} />
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-primary">{video.titulo}</h3>
+                    {video.descricao && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{video.descricao}</p>}
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{video.plataforma}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="reserva" className="bg-primary px-5 py-16 text-primary-foreground">
         <div className="mx-auto max-w-2xl">
